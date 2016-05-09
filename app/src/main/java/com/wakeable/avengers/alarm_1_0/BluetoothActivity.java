@@ -123,6 +123,10 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
 
+        ConnectedThread ct = new ConnectedThread(btSocket);
+
+        ct.start();
+
         // Create a data stream so we can talk to server.
         Log.d(TAG, "...Create Socket...");
 
@@ -192,6 +196,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
+//                    Log.d(TAG, new String(buffer));
                     h.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();     // Send to message queue Handler
                 } catch (IOException e) {
                     break;
