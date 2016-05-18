@@ -30,6 +30,8 @@ public class BluetoothActivity extends AppCompatActivity {
     private BluetoothSocket btSocket = null;
     private StringBuilder sb = new StringBuilder();
 
+    private ConnectedThread ct;
+
     // SPP UUID service
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
@@ -123,7 +125,7 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
 
-        ConnectedThread ct = new ConnectedThread(btSocket);
+        ct = new ConnectedThread(btSocket);
 
         ct.start();
 
@@ -138,11 +140,13 @@ public class BluetoothActivity extends AppCompatActivity {
 
         Log.d(TAG, "...In onPause()...");
 
-        try {
-            btSocket.close();
-        } catch (IOException e2) {
-            errorExit("Fatal Error", "In onPause() and failed to close socket." + e2.getMessage() + ".");
-        }
+        ct.cancel();
+
+//        try {
+//            btSocket.close();
+//        } catch (IOException e2) {
+//            errorExit("Fatal Error", "In onPause() and failed to close socket." + e2.getMessage() + ".");
+//        }
     }
 
     private void checkBTState() {
@@ -169,10 +173,12 @@ public class BluetoothActivity extends AppCompatActivity {
     private class ConnectedThread extends Thread {
         private final InputStream mmInStream;
         private final OutputStream mmOutStream;
+        private final BluetoothSocket mmSocket;
 
         public ConnectedThread(BluetoothSocket socket) {
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
+            mmSocket = socket;
 
             // Get the input and output streams, using temp objects because
             // member streams are final
@@ -196,7 +202,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
-//                    Log.d(TAG, new String(buffer));
+                    Log.d(TAG, new String(buffer));
                     h.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();     // Send to message queue Handler
                 } catch (IOException e) {
                     break;
@@ -204,15 +210,15 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         }
 
-        /* Call this from the main activity to send data to the remote device */
-        public void write(String message) {
-            Log.d(TAG, "...Data to send: " + message + "...");
-            byte[] msgBuffer = message.getBytes();
+        public void cancel() {
             try {
-                mmOutStream.write(msgBuffer);
+                mmSocket.close();
+                mmInStream.close();
+                mmOutStream.close();
             } catch (IOException e) {
-                Log.d(TAG, "...Error data send: " + e.getMessage() + "...");
+                Log.e(TAG, e.getMessage());
             }
         }
+
     }
 }
