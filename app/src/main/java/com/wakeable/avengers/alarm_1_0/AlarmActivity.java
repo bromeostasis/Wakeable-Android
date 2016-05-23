@@ -1,5 +1,6 @@
 package com.wakeable.avengers.alarm_1_0;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
@@ -27,7 +28,7 @@ import java.lang.reflect.Method;
 import java.util.UUID;
 
 public class AlarmActivity extends AppCompatActivity {
-    private static final String TAG = "bluetooth2";
+    private static final String TAG = "AlarmActivity";
 
     TextView txtArduino;
     Handler h;
@@ -37,13 +38,14 @@ public class AlarmActivity extends AppCompatActivity {
     private BluetoothSocket btSocket = null;
     private StringBuilder sb = new StringBuilder();
     private ConnectedThread ct;
-    private boolean firstRun = true;
+    private final String PREFS = "preferences";
 
     // SPP UUID service
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // MAC-address of Bluetooth module (you must edit this line)
-    private static String address = "20:15:12:22:60:16";
+
+    private static String address;
 
     @Override
     protected void onPause() {
@@ -70,7 +72,9 @@ public class AlarmActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+        address = prefs.getString("macAddress", "We Fucked UP");
+
 
 
         Log.d(TAG, "First? " + prefs.getBoolean("first", true));
@@ -199,9 +203,6 @@ public class AlarmActivity extends AppCompatActivity {
     @Override
     public void onResume() {
         super.onResume();
-
-
-
 
     }
 

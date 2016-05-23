@@ -2,6 +2,7 @@ package com.wakeable.avengers.alarm_1_0;
 
 import android.app.Activity;
 import android.app.AlarmManager;
+import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,7 @@ import java.util.Calendar;
 public class MainActivity extends Activity {
 
     AlarmManager alarmManager;
+    private final String PREFS = "preferences";
     private PendingIntent pendingIntent;
     private TimePicker alarmTimePicker;
     private Button bluetoothButton;
@@ -67,32 +69,49 @@ public class MainActivity extends Activity {
     }
 
     public void onToggleClicked(View view) {
-        if (((ToggleButton) view).isChecked()) {
-            Log.d("MyActivity", "Alarm On");
-            Calendar today = Calendar.getInstance();
-            Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
-            calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
-            calendar.set(Calendar.SECOND, 0);
-            if (calendar.compareTo(today) < 0 ){
-                Log.d("MainActivity", "Let's set this for tomorrow?");
-                calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
-                Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+        if (!prefs.getString("macAddress", "empty").equals("empty")) {
+            if (((ToggleButton) view).isChecked()) {
+                Log.d("MyActivity", "Alarm On");
+                Calendar today = Calendar.getInstance();
+                Calendar calendar = Calendar.getInstance();
+                calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
+                calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
+                calendar.set(Calendar.SECOND, 0);
+                if (calendar.compareTo(today) < 0) {
+                    Log.d("MainActivity", "Let's set this for tomorrow?");
+                    calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
+                    Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+                }
+                Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
+                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+                alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+                Log.d("MyActivity", String.valueOf(calendar.getTime()));
+            } else {
+                alarmManager.cancel(pendingIntent);
+                setAlarmText("");
+                Log.d("MyActivity", "Alarm Off");
             }
-            Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-            pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
-            alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
-            Log.d("MyActivity", String.valueOf(calendar.getTime()));
-        } else {
-            alarmManager.cancel(pendingIntent);
-            setAlarmText("");
-            Log.d("MyActivity", "Alarm Off");
+        }
+        else{
+            ((ToggleButton) view).toggle();
+            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
+
+            builder.setMessage("You do not have a bluetooth device paired, you can't set an alarm yet!");
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
     }
 
     public void onBluetoothClicked(View view){
         Intent btIntent = new Intent(getApplicationContext(), BluetoothActivity.class);
         startActivity(btIntent);
+    }
+
+    public void onDeviceClicked(View view){
+        Intent deviceIntent = new Intent(getApplicationContext(), DeviceActivity.class);
+        startActivity(deviceIntent);
     }
 
     public void setAlarmText(String alarmText) {
