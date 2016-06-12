@@ -13,6 +13,10 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(final Context context, Intent intent) {
+
+        Intent startIntent = new Intent(context, RingtoneService.class);
+        context.startService(startIntent);
+
         Intent i = new Intent(context, AlarmActivity.class);
         MainActivity mi = MainActivity.instance();
         if (mi.isInForeground()){
@@ -30,8 +34,5 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         context.startActivity(i);
 
         MainActivity.changeToggle();
-
-        Intent startIntent = new Intent(context, RingtoneService.class);
-        context.startService(startIntent);
     }
 }

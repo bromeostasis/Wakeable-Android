@@ -77,12 +77,12 @@ public class AlarmActivity extends AppCompatActivity {
 
 
 
-        Log.d(TAG, "First? " + prefs.getBoolean("first", true));
+//        Log.d(TAG, "First? " + prefs.getBoolean("first", true));
 
-        if(prefs.getBoolean("first", true)) {
-            SharedPreferences.Editor editor = prefs.edit();
-            editor.putBoolean("first" ,false);
-            editor.commit();
+//        if(prefs.getBoolean("first", true)) {
+//            SharedPreferences.Editor editor = prefs.edit();
+//            editor.putBoolean("first" ,false);
+//            editor.commit();
             Log.d(TAG, "...onStart - try connect...");
 
             // Set up a pointer to the remote node using it's address.
@@ -130,7 +130,7 @@ public class AlarmActivity extends AppCompatActivity {
             ct = new ConnectedThread(btSocket);
 
             ct.start();
-        }
+//        }
     }
 
     @Override
@@ -188,6 +188,7 @@ public class AlarmActivity extends AppCompatActivity {
         Intent ringtoneIntent = new Intent(context, RingtoneService.class);
         context.stopService(ringtoneIntent);
         if(getIntent().getBooleanExtra("foreground", false)){
+            ct.cancel();
             Intent i = new Intent(context, MainActivity.class);
             startActivity(i);
             finish();
