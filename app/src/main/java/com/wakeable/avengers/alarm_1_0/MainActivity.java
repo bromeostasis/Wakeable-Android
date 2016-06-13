@@ -83,8 +83,8 @@ public class MainActivity extends Activity {
                     calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
                     Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
                 }
-                Intent myIntent = new Intent(MainActivity.this, AlarmReceiver.class);
-                pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, myIntent, 0);
+                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
                 alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
                 Log.d("MyActivity", String.valueOf(calendar.getTime()));
             } else {

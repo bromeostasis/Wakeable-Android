@@ -9,15 +9,18 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 import android.util.Log;
 
 
+
 public class AlarmReceiver extends WakefulBroadcastReceiver {
+
+    LogService ls = new LogService();
 
     @Override
     public void onReceive(final Context context, Intent intent) {
 
-        Intent startIntent = new Intent(context, RingtoneService.class);
-        context.startService(startIntent);
+        ls.logString("In AlarmReceiver, beginning");
 
-        Intent i = new Intent(context, AlarmActivity.class);
+
+        Intent i = new Intent(context, AlarmIntentService.class);
         MainActivity mi = MainActivity.instance();
         if (mi.isInForeground()){
             Log.d("Receiver", "It's still in the foreground!");
@@ -31,8 +34,12 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         //this will send a notification message
         Log.d("AlarmReceiver", "trying to send!");
-        context.startActivity(i);
+//        context.startActivity(i);
 
         MainActivity.changeToggle();
+
+        ls.logString("In AlarmReceiver, starting wakeful service");
+        startWakefulService(context, i);
+
     }
 }
