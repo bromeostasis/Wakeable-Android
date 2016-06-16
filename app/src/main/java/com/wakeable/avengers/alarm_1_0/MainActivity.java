@@ -85,7 +85,7 @@ public class MainActivity extends Activity {
                 }
                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
                 pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-                alarmManager.setExact(AlarmManager.RTC, calendar.getTimeInMillis(), pendingIntent);
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                 Log.d("MyActivity", String.valueOf(calendar.getTime()));
             } else {
                 alarmManager.cancel(pendingIntent);
