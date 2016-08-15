@@ -72,6 +72,16 @@
         <service
             android:name=".LogService"
             android:enabled="true"
+            android:exported="true" />
+
+        <activity
+            android:name=".DeviceActivityLe"
+            android:label="@string/title_activity_device_activity_le"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true"
             android:exported="true"></service>
     </application>
 

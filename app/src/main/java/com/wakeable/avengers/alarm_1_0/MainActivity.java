@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
     }
 
     public void onDeviceClicked(View view){
-        Intent deviceIntent = new Intent(getApplicationContext(), DeviceActivity.class);
+        Intent deviceIntent = new Intent(getApplicationContext(), DeviceActivityLe.class);
         startActivity(deviceIntent);
     }
 
