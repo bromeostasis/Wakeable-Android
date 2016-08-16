@@ -1,5 +1,6 @@
 package com.wakeable.avengers.alarm_1_0;
 
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
@@ -8,6 +9,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,6 +31,7 @@ public class DeviceActivityLe extends AppCompatActivity {
     private String mBluetoothAddress;
     private Button btn;
     private BluetoothLeService mBluetoothLeService;
+    private final String PREFS = "preferences";
 
     private static final long SCAN_PERIOD = 10000;
 
@@ -126,6 +129,10 @@ public class DeviceActivityLe extends AppCompatActivity {
                         mBluetoothAdapter.stopLeScan(mLeScanCallback);
                         Log.d(TAG, "Found a WakeAble! Stopping scan");
                         mBluetoothAddress = device.getAddress();
+                        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+                        SharedPreferences.Editor editor = prefs.edit();
+                        editor.putString("macAddress", mBluetoothAddress);
+                        editor.commit();
 
                         // Turn on button as soon as BT is available.
                         btn.post(new Runnable() {

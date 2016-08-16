@@ -6,6 +6,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
@@ -13,6 +14,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import java.util.List;
 import java.util.UUID;
 
 public class BluetoothLeService extends Service {
@@ -40,9 +42,8 @@ public class BluetoothLeService extends Service {
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
 
-    public final static UUID UUID_HM10_SERIAL =
-
-            UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+    public final static UUID UUID_HM10_CHARACTERISTIC = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
+    public final static UUID UUID_HM10_SERVICE = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
     public BluetoothLeService() {
     }
 
@@ -107,11 +108,26 @@ public class BluetoothLeService extends Service {
                 @Override
                 // New services discovered
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-                    if (status == BluetoothGatt.GATT_SUCCESS) {
-                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-                    } else {
-                        Log.w(TAG, "onServicesDiscovered received: " + status);
+                    List<BluetoothGattService> services = mBluetoothGatt.getServices();
+                    for (BluetoothGattService service : services){
+                        Log.d(TAG, "Available service: " + service.getUuid().toString());
+                        if (service.getUuid().equals(UUID_HM10_SERVICE)){
+                            Log.d(TAG, "Discovered HM10 service! Listing characteristics");
+                            for (BluetoothGattCharacteristic characteristic :  service.getCharacteristics()){
+                                Log.d(TAG, "Available characteristic: " + characteristic.getUuid().toString());
+                                if (characteristic.getUuid().equals(UUID_HM10_CHARACTERISTIC)){
+                                    Log.d(TAG, "Found the HM10 characteristic! Want to try reading and notifying!");
+                                    setCharacteristicNotification(characteristic, true);
+//                                    onCharacteristicRead(mBluetoothGatt, characteristic, status);
+                                }
+                            }
+                        }
                     }
+//                    if (status == BluetoothGatt.GATT_SUCCESS) {
+//                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+//                    } else {
+//                        Log.w(TAG, "onServicesDiscovered received: " + status);
+//                    }
                 }
 
                 @Override
@@ -122,6 +138,12 @@ public class BluetoothLeService extends Service {
                     if (status == BluetoothGatt.GATT_SUCCESS) {
                         broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
                     }
+                }
+
+                @Override
+                public void onCharacteristicChanged(BluetoothGatt gatt,
+                                                    BluetoothGattCharacteristic characteristic) {
+                    broadcastUpdate(ACTION_DATA_AVAILABLE, characteristic);
                 }
             };
 
@@ -154,32 +176,21 @@ public class BluetoothLeService extends Service {
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
         Log.d(TAG, "In broadcast update. characteristic id: " + characteristic.getUuid().toString());
-        if (UUID_HM10_SERIAL.equals(characteristic.getUuid())) {
 
-            Log.v(TAG, "broadcastUpdate()");
+        Log.v(TAG, "broadcastUpdate()");
 
-            final byte[] data = characteristic.getValue();
+        final byte[] data = characteristic.getValue();
 
-            Log.v(TAG, "data.length: " + data.length);
+        Log.v(TAG, "data.length: " + data.length);
 
-            if (data.length > 0) {
-                final StringBuilder stringBuilder = new StringBuilder(data.length);
-                for(byte byteChar : data) {
-                    stringBuilder.append(String.format("%02X ", byteChar));
+        if (data.length > 0) {
+            final StringBuilder stringBuilder = new StringBuilder(data.length);
+            for(byte byteChar : data) {
 
-                    Log.v(TAG, String.format("%02X ", byteChar));
-                }
-                intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
+                Log.v(TAG, String.format("%02X ", byteChar));
             }
-        } else {
-            // For all other profiles, writes the data formatted in HEX.
-            final byte[] data = characteristic.getValue();
-            if (data != null && data.length > 0) {
-                final StringBuilder stringBuilder = new StringBuilder(data.length);
-                for(byte byteChar : data)
-                    stringBuilder.append(String.format("%02X ", byteChar));
-                intent.putExtra(EXTRA_DATA, new String(data) + "\n" + stringBuilder.toString());
-            }
+            intent.putExtra(EXTRA_DATA, new String(data));
+            Log.d(TAG, intent.getStringExtra(EXTRA_DATA));
         }
         sendBroadcast(intent);
     }
@@ -203,7 +214,9 @@ public class BluetoothLeService extends Service {
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
-        mBluetoothGatt.close();
+//        if (mBluetoothGatt != null){
+//            mBluetoothGatt.close();
+//        }
         return super.onUnbind(intent);
     }
 

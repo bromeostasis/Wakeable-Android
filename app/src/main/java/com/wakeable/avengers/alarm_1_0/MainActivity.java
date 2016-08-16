@@ -4,10 +4,15 @@ import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -29,6 +34,9 @@ public class MainActivity extends Activity {
     private static ToggleButton alarmToggle;
     private boolean inForeground = false;
 
+    private BluetoothAdapter mBluetoothAdapter;
+    private BluetoothLeService mBluetoothLeService;
+
     public static MainActivity instance() {
         return inst;
     }
@@ -47,6 +55,13 @@ public class MainActivity extends Activity {
     }
 
     @Override
+    protected void onDestroy() {
+
+        unbindService(mServiceConnection);
+        super.onDestroy();
+    }
+
+    @Override
     protected void onPause() {
         inForeground = false;
         super.onPause();
@@ -54,6 +69,9 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Bind service
+        Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         inForeground = true;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -62,6 +80,12 @@ public class MainActivity extends Activity {
         alarmTextView = (TextView) findViewById(R.id.alarmText);
         alarmToggle = (ToggleButton) findViewById(R.id.alarmToggle);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+
+
+        // Initializes Bluetooth adapter.
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
     }
 
     public static void changeToggle(){
@@ -72,21 +96,30 @@ public class MainActivity extends Activity {
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
         if (!prefs.getString("macAddress", "empty").equals("empty")) {
             if (((ToggleButton) view).isChecked()) {
-                Log.d("MyActivity", "Alarm On");
-                Calendar today = Calendar.getInstance();
-                Calendar calendar = Calendar.getInstance();
-                calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
-                calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
-                calendar.set(Calendar.SECOND, 0);
-                if (calendar.compareTo(today) < 0) {
-                    Log.d("MainActivity", "Let's set this for tomorrow?");
-                    calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
-                    Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+
+                String address = prefs.getString("macAddress", "We Fucked UP");
+                Boolean status = mBluetoothLeService.connect(address, mBluetoothAdapter);
+
+                if (status == true) {
+                    Log.d("MyActivity", "Alarm On");
+                    Calendar today = Calendar.getInstance();
+                    Calendar calendar = Calendar.getInstance();
+                    calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
+                    calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
+                    calendar.set(Calendar.SECOND, 0);
+                    if (calendar.compareTo(today) < 0) {
+                        Log.d("MainActivity", "Let's set this for tomorrow?");
+                        calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
+                        Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+                    }
+                    Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                    pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+                    Log.d("MyActivity", String.valueOf(calendar.getTime()));
                 }
-                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-                alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
-                Log.d("MyActivity", String.valueOf(calendar.getTime()));
+                else{
+                    Log.d("Main", "Could not connect to bluetooth device. Not setting alarm");
+                }
             } else {
                 alarmManager.cancel(pendingIntent);
                 setAlarmText("");
@@ -118,4 +151,20 @@ public class MainActivity extends Activity {
         alarmTextView.setText(alarmText);
     }
     public boolean isInForeground(){return inForeground;}
+
+
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
 }
