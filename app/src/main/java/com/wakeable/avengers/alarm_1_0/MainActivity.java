@@ -3,15 +3,20 @@ package com.wakeable.avengers.alarm_1_0;
 import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -24,6 +29,7 @@ import java.util.Calendar;
 
 public class MainActivity extends Activity {
 
+    private static final String TAG = "MainActivity";
     AlarmManager alarmManager;
     private final String PREFS = "preferences";
     private PendingIntent pendingIntent;
@@ -34,8 +40,18 @@ public class MainActivity extends Activity {
     private static ToggleButton alarmToggle;
     private boolean inForeground = false;
 
+    private Handler mHandler;
+
+    // From device activity
+    private final static int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
+    private boolean mScanning;
+    private String mBluetoothAddress;
     private BluetoothLeService mBluetoothLeService;
+    private SharedPreferences.Editor editor;
+
+    private static final long SCAN_PERIOD = 10000;
+
 
     public static MainActivity instance() {
         return inst;
@@ -45,7 +61,7 @@ public class MainActivity extends Activity {
     public void onStart() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        SharedPreferences.Editor editor = prefs.edit();
+        editor = prefs.edit();
         editor.clear();
         editor.commit();
 
@@ -69,9 +85,6 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // Bind service
-        Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
         inForeground = true;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
@@ -86,9 +99,18 @@ public class MainActivity extends Activity {
         final BluetoothManager bluetoothManager =
                 (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        // Bind service
+        Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
     }
 
-    public static void changeToggle(){
+    public static void changeToggle() {
         alarmToggle.toggle();
     }
 
@@ -97,10 +119,12 @@ public class MainActivity extends Activity {
         if (!prefs.getString("macAddress", "empty").equals("empty")) {
             if (((ToggleButton) view).isChecked()) {
 
-                String address = prefs.getString("macAddress", "We Fucked UP");
-                Boolean status = mBluetoothLeService.connect(address, mBluetoothAdapter);
+//                String address = prefs.getString("macAddress", "We Fucked UP");
+//                Boolean status = mBluetoothLeService.connect(address, mBluetoothAdapter);
 
-                if (status == true) {
+                boolean connected = prefs.getBoolean("connected", false);
+
+                if (connected) {
                     Log.d("MyActivity", "Alarm On");
                     Calendar today = Calendar.getInstance();
                     Calendar calendar = Calendar.getInstance();
@@ -116,8 +140,7 @@ public class MainActivity extends Activity {
                     pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
                     Log.d("MyActivity", String.valueOf(calendar.getTime()));
-                }
-                else{
+                } else {
                     Log.d("Main", "Could not connect to bluetooth device. Not setting alarm");
                 }
             } else {
@@ -125,8 +148,7 @@ public class MainActivity extends Activity {
                 setAlarmText("");
                 Log.d("MyActivity", "Alarm Off");
             }
-        }
-        else{
+        } else {
             ((ToggleButton) view).toggle();
             AlertDialog.Builder builder = new AlertDialog.Builder(inst);
 
@@ -137,21 +159,32 @@ public class MainActivity extends Activity {
         }
     }
 
-    public void onBluetoothClicked(View view){
+    public void onBluetoothClicked(View view) {
         Intent btIntent = new Intent(getApplicationContext(), BluetoothActivity.class);
         startActivity(btIntent);
     }
 
-    public void onDeviceClicked(View view){
-        Intent deviceIntent = new Intent(getApplicationContext(), DeviceActivityLe.class);
-        startActivity(deviceIntent);
+    public void onDeviceClicked(View view) {
+        mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mScanning = false;
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+            }
+        }, SCAN_PERIOD);
+
+        mScanning = true;
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
 
     public void setAlarmText(String alarmText) {
         alarmTextView.setText(alarmText);
     }
-    public boolean isInForeground(){return inForeground;}
 
+    public boolean isInForeground() {
+        return inForeground;
+    }
 
 
     // Code to manage Service lifecycle.
@@ -167,4 +200,39 @@ public class MainActivity extends Activity {
             mBluetoothLeService = null;
         }
     };
+
+    // Device scan callback.
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
+                    Log.d(TAG, "Device found: " + device.getName());
+                    if (device.getName().equals("WakeAble")) {
+                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                        Log.d(TAG, "Found a WakeAble! Stopping scan");
+                        mBluetoothAddress = device.getAddress();
+                        editor.putString("macAddress", mBluetoothAddress);
+                        editor.commit();
+
+                        // Turn on button as soon as BT is available.
+                        // Use the Builder class for convenient dialog construction
+                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                        builder.setMessage("Found device with name " + device.getName() + " and address " + device.getAddress() + ". Do you want to connect?")
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // FIRE ZE MISSILES!
+                                        mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
+                                    }
+                                })
+                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        // User cancelled the dialog
+                                    }
+                                });
+                        builder.create().show();
+
+                    }
+                }
+            };
 }
