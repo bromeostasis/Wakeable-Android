@@ -1,5 +1,6 @@
 package com.wakeable.avengers.alarm_1_0;
 
+import android.app.Activity;
 import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -10,6 +11,7 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -41,6 +43,7 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
+    private final String PREFS = "preferences";
 
     public final static UUID UUID_HM10_CHARACTERISTIC = UUID.fromString("0000ffe1-0000-1000-8000-00805f9b34fb");
     public final static UUID UUID_HM10_SERVICE = UUID.fromString("0000ffe0-0000-1000-8000-00805f9b34fb");
@@ -74,7 +77,7 @@ public class BluetoothLeService extends Service {
         }
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
-        mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
+        mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
         Log.d(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
@@ -165,6 +168,21 @@ public class BluetoothLeService extends Service {
 
     private void broadcastUpdate(final String action) {
         Log.d(TAG, "Broadcasting update: " + action);
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+            Log.d(TAG, "Connected to BLE device");
+            editor.putBoolean("connected", true);
+
+        }
+        else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+            Log.d(TAG, "Disconnected from BLE device");
+            editor.putBoolean("connected", false);
+        }
+        editor.commit();
+
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }

@@ -67,7 +67,6 @@ public class AlarmActivity extends AppCompatActivity {
 //                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
 //        mBluetoothAdapter = bluetoothManager.getAdapter();
 //
-//        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
 //        String address = prefs.getString("macAddress", "We Fucked UP");
 //        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()){
 //            Log.d(TAG, device.getName() + " found. address: " + device.getAddress());
@@ -76,6 +75,23 @@ public class AlarmActivity extends AppCompatActivity {
 //            }
 //        }
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+        boolean connected = prefs.getBoolean("connected", true);
+
+        Log.d(TAG, "IN onresume. Visible? " + connected);
+        if (connected){
+            btn.setVisibility(View.INVISIBLE);
+        }
+        else{
+            btn.setVisibility(View.VISIBLE);
+        }
+    }
+
     public void turnOffAlarm(View view){
 
         Log.d(TAG, "turning it off now?!?!");
@@ -111,8 +127,6 @@ public class AlarmActivity extends AppCompatActivity {
 
     private static IntentFilter makeGattUpdateIntentFilter() {
         final IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_CONNECTED);
-        intentFilter.addAction(BluetoothLeService.ACTION_GATT_DISCONNECTED);
         intentFilter.addAction(BluetoothLeService.ACTION_GATT_SERVICES_DISCOVERED);
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;

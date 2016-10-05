@@ -3,7 +3,6 @@ package com.wakeable.avengers.alarm_1_0;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,6 +31,7 @@ public class DeviceActivityLe extends AppCompatActivity {
     private Button btn;
     private BluetoothLeService mBluetoothLeService;
     private final String PREFS = "preferences";
+    private SharedPreferences.Editor editor;
 
     private static final long SCAN_PERIOD = 10000;
 
@@ -41,12 +41,6 @@ public class DeviceActivityLe extends AppCompatActivity {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-//            if (!mBluetoothLeService.initialize()) {
-//                Log.e(TAG, "Unable to initialize Bluetooth");
-//                finish();
-//            }
-//            // Automatically connects to the device upon successful start-up initialization.
-//            mBluetoothLeService.connect(mDeviceAddress);
         }
 
         @Override
@@ -58,6 +52,12 @@ public class DeviceActivityLe extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+        editor = prefs.edit();
+
+
         setContentView(R.layout.activity_device_activity_le);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -96,6 +96,11 @@ public class DeviceActivityLe extends AppCompatActivity {
         unbindService(mServiceConnection);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
     public void scanLeDevices(View view) {
         // Stops scanning after a pre-defined scan period.
         mHandler = new Handler();
@@ -129,8 +134,6 @@ public class DeviceActivityLe extends AppCompatActivity {
                         mBluetoothAdapter.stopLeScan(mLeScanCallback);
                         Log.d(TAG, "Found a WakeAble! Stopping scan");
                         mBluetoothAddress = device.getAddress();
-                        SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
-                        SharedPreferences.Editor editor = prefs.edit();
                         editor.putString("macAddress", mBluetoothAddress);
                         editor.commit();
 
@@ -141,7 +144,6 @@ public class DeviceActivityLe extends AppCompatActivity {
                                 btn.setVisibility(View.VISIBLE);
                             }
                         });
-//                        BluetoothLeService.connect(device.getAddress());
                     }
                 }
             };
