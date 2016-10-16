@@ -106,7 +106,6 @@ public class AlarmActivity extends AppCompatActivity {
         }
         else{
             finishAffinity();
-            System.exit(0);
         }
     }
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read

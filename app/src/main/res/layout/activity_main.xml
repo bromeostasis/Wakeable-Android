@@ -40,21 +40,9 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Bluetooth"
-        android:id="@+id/bluetoothButton"
-        android:onClick="onBluetoothClicked"
-        android:layout_alignTop="@+id/alarmText"
-        android:layout_alignLeft="@+id/alarmTimePicker"
-        android:layout_alignStart="@+id/alarmTimePicker"
-        android:layout_marginTop="65dp" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="Connect to Device"
         android:id="@+id/deviceButton"
         android:onClick="onDeviceClicked"
-        android:layout_alignTop="@+id/bluetoothButton"
-        android:layout_alignLeft="@+id/alarmText"
-        android:layout_alignStart="@+id/alarmText" />
+        android:layout_alignTop="@+id/alarmText"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

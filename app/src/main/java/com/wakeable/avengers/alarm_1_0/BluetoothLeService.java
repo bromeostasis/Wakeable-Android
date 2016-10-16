@@ -175,11 +175,13 @@ public class BluetoothLeService extends Service {
         if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
             Log.d(TAG, "Connected to BLE device");
             editor.putBoolean("connected", true);
+            MainActivity.toggleConnectionButton();
 
         }
         else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
             Log.d(TAG, "Disconnected from BLE device");
             editor.putBoolean("connected", false);
+            MainActivity.toggleConnectionButton();
         }
         editor.commit();
 
