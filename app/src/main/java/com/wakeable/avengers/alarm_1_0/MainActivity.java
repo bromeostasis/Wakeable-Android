@@ -115,9 +115,17 @@ public class MainActivity extends Activity {
 
         // Make sure we have location permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(inst, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-        }
+            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
+            builder.setMessage("Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for WakeAble to work correctly!")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ActivityCompat.requestPermissions(inst, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
+                    }
+                });
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
+        }
         // Bind service
         Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -167,23 +175,22 @@ public class MainActivity extends Activity {
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(inst);
                     builder.setMessage("We can't connect to your WakeAble device right now. Maybe your button is out of range or not plugged in? " +
-                            "If you proceed, the alarm may just go off like a regular alarm with no snooze button.");
-                    builder.setPositiveButton("I understand the risk, set my alarm anyway", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            Calendar selectedTime = getSelectedTime();
-                            Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                            pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
-                            Log.d("MyActivity", String.valueOf(selectedTime.getTime()));
-                        }
-                    });
-                    builder.setNegativeButton("Thanks, I'll get connected and try again", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            // User cancelled the dialog
-                            ((ToggleButton) view).toggle();
-                        }
-                    });
-
+                            "If you proceed, the alarm may just go off like a regular alarm with no snooze button.")
+                        .setPositiveButton("I understand the risk, set my alarm anyway", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                Calendar selectedTime = getSelectedTime();
+                                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
+                                Log.d("MyActivity", String.valueOf(selectedTime.getTime()));
+                            }
+                        })
+                        .setNegativeButton("Thanks, I'll get connected and try again", new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int id) {
+                                // User cancelled the dialog
+                                ((ToggleButton) view).toggle();
+                            }
+                        });
                     AlertDialog dialog = builder.create();
                     dialog.show();
                 }
@@ -194,10 +201,8 @@ public class MainActivity extends Activity {
         } else {
             ((ToggleButton) view).toggle();
             AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-
             builder.setMessage("You have not configured a device yet. Please connect to WakeAble before trying to set an alarm!!")
             .setPositiveButton("Ok", new DialogInterface.OnClickListener() {public void onClick(DialogInterface dialog, int id) {}});
-
             AlertDialog dialog = builder.create();
             dialog.show();
         }
@@ -222,43 +227,54 @@ public class MainActivity extends Activity {
         return inForeground;
     }
 
+    public void onDeviceClicked(final View view) {
 
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+        String address = prefs.getString("macAddress", "empty");
 
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+        if (address.equals("empty")){
+            mHandler = new Handler();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    String address = prefs.getString("macAddress", "empty");
+                    if (address.equals("empty")){
+                        AlertDialog.Builder builder = new AlertDialog.Builder(inst);
+                        builder.setMessage("Couldn't find a WakeAble device. Make sure your device is plugged in and close by!")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
 
-
-            String address = prefs.getString("macAddress", "empty");
-            if (!address.equals("empty")) {
-                boolean connected = prefs.getBoolean("connected", false);
-                if (!connected) {
-                    Log.d(TAG, "Back from killed state. Let's try to connect to the device");
-                    mBluetoothLeService.connect(address, mBluetoothAdapter);
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
                 }
-            }
+            }, SCAN_PERIOD);
+
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        }
+        else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
+            builder.setMessage("We already have a WakeAble device configured with address " + address + ". Unless you're trying to switch devices, you likely just need to plug your device in, move it closer to your phone, or turn bluetooth on.")
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                })
+                .setNegativeButton("I want to switch my device", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        editor.remove("macAddress");
+                        editor.commit();
+                        onDeviceClicked(view);
+                    }
+                });
+            AlertDialog dialog = builder.create();
+            dialog.show();
         }
 
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
-    };
-
-    public void onDeviceClicked(View view) {
-        mHandler = new Handler();
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScanning = false;
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-            }
-        }, SCAN_PERIOD);
-
-        mScanning = true;
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
     }
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
@@ -292,4 +308,30 @@ public class MainActivity extends Activity {
                     }
                 }
             };
+
+
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+
+
+            String address = prefs.getString("macAddress", "empty");
+            if (!address.equals("empty")) {
+                boolean connected = prefs.getBoolean("connected", false);
+                if (!connected) {
+                    Log.d(TAG, "Back from killed state. Let's try to connect to the device");
+                    mBluetoothLeService.connect(address, mBluetoothAdapter);
+                }
+            }
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
 }
