@@ -12,16 +12,6 @@
     tools:context="com.wakeable.avengers.alarm_1_0.AlarmActivity"
     tools:showIn="@layout/activity_alarm">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Welcome to your alarm!!"
-        android:id="@+id/textView"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:autoText="false"
-        android:textSize="48px" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -30,14 +20,17 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="86dp"
+        android:textColor="#5d5f5c"
+        android:background="@drawable/button"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
         android:onClick="turnOffAlarm" />
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Bluetooth Data"
-        android:id="@+id/btText"
+        android:id="@+id/alarmText"
         android:layout_above="@+id/button"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="157dp" />

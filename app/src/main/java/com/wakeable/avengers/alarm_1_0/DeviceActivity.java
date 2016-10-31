@@ -29,6 +29,8 @@ import java.util.UUID;
 
 public class DeviceActivity extends AppCompatActivity {
 
+    private static LogService ls = new LogService();
+
     private static final String TAG = "DeviceActivity";
     private static DeviceActivity inst;
     private final String PREFS = "preferences";
@@ -124,7 +126,7 @@ public class DeviceActivity extends AppCompatActivity {
             errorExit("Fatal Error", "Bluetooth not support");
         } else {
             if (btAdapter.isEnabled()) {
-                Log.d(TAG, "...Bluetooth ON...");
+                ls.logString(TAG, "...Bluetooth ON...");
             } else {
                 //Prompt user to turn on Bluetooth
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -156,7 +158,7 @@ public class DeviceActivity extends AppCompatActivity {
     private boolean pairDevice(BluetoothDevice device) {
         boolean result;
         try {
-            Log.d(TAG, "Start Pairing...");
+            ls.logString(TAG, "Start Pairing...");
 
 
             Method m = device.getClass()
@@ -164,7 +166,7 @@ public class DeviceActivity extends AppCompatActivity {
             m.invoke(device, (Object[]) null);
             result = true;
 
-            Log.d(TAG, "Pairing finished.");
+            ls.logString(TAG, "Pairing finished.");
         } catch (Exception e) {
             result=false;
             Log.e(TAG, e.getMessage());
@@ -174,7 +176,7 @@ public class DeviceActivity extends AppCompatActivity {
 
     public void discover(View view) {
 
-        Log.d(TAG, "Discovering...");
+        ls.logString(TAG, "Discovering...");
         if (btAdapter.isDiscovering()) {
             btAdapter.cancelDiscovery();
         }
@@ -188,7 +190,7 @@ public class DeviceActivity extends AppCompatActivity {
             this.unregisterReceiver(mReceiver);
         }
         catch(IllegalArgumentException e){
-            Log.d(TAG, e.getMessage());
+            ls.logString(TAG, e.getMessage());
         }
 
 //        if(btSocket.isConnected()){
@@ -251,11 +253,11 @@ public class DeviceActivity extends AppCompatActivity {
 //        btAdapter.cancelDiscovery();
 //
 //        // Establish the connection.  This will block until it connects.
-//        Log.d(TAG, "...Connecting...");
+//        ls.logString(TAG, "...Connecting...");
 //        boolean result;
 //        try {
 //            btSocket.connect();
-//            Log.d(TAG, "....Connection ok...");
+//            ls.logString(TAG, "....Connection ok...");
 //            result = true;
 //        } catch (IOException e) {
 //            try {

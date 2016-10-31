@@ -21,6 +21,8 @@ import java.util.UUID;
 
 public class BluetoothLeService extends Service {
 
+    private static LogService ls = new LogService();
+
     private final static String TAG = BluetoothLeService.class.getSimpleName();
 
     private BluetoothManager mBluetoothManager;
@@ -61,7 +63,7 @@ public class BluetoothLeService extends Service {
         // Previously connected device.  Try to reconnect.
         if (mBluetoothDeviceAddress != null && address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            ls.logString(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
                 return true;
@@ -78,7 +80,7 @@ public class BluetoothLeService extends Service {
         // We want to directly connect to the device, so we are setting the autoConnect
         // parameter to false.
         mBluetoothGatt = device.connectGatt(this, true, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
+        ls.logString(TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
         return true;
@@ -113,13 +115,13 @@ public class BluetoothLeService extends Service {
                 public void onServicesDiscovered(BluetoothGatt gatt, int status) {
                     List<BluetoothGattService> services = mBluetoothGatt.getServices();
                     for (BluetoothGattService service : services){
-                        Log.d(TAG, "Available service: " + service.getUuid().toString());
+                        ls.logString(TAG, "Available service: " + service.getUuid().toString());
                         if (service.getUuid().equals(UUID_HM10_SERVICE)){
-                            Log.d(TAG, "Discovered HM10 service! Listing characteristics");
+                            ls.logString(TAG, "Discovered HM10 service! Listing characteristics");
                             for (BluetoothGattCharacteristic characteristic :  service.getCharacteristics()){
-                                Log.d(TAG, "Available characteristic: " + characteristic.getUuid().toString());
+                                ls.logString(TAG, "Available characteristic: " + characteristic.getUuid().toString());
                                 if (characteristic.getUuid().equals(UUID_HM10_CHARACTERISTIC)){
-                                    Log.d(TAG, "Found the HM10 characteristic! Want to try reading and notifying!");
+                                    ls.logString(TAG, "Found the HM10 characteristic! Want to try reading and notifying!");
                                     setCharacteristicNotification(characteristic, true);
 //                                    onCharacteristicRead(mBluetoothGatt, characteristic, status);
                                 }
@@ -167,23 +169,24 @@ public class BluetoothLeService extends Service {
 
 
     private void broadcastUpdate(final String action) {
-        Log.d(TAG, "Broadcasting update: " + action);
+        ls.logString(TAG, "Broadcasting update: " + action);
 
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
         SharedPreferences.Editor editor = prefs.edit();
 
         if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-            Log.d(TAG, "Connected to BLE device");
+            ls.logString(TAG, "Connected to BLE device");
             editor.putBoolean("connected", true);
+            editor.commit();
             MainActivity.toggleConnectionButton();
 
         }
         else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-            Log.d(TAG, "Disconnected from BLE device");
+            ls.logString(TAG, "Disconnected from BLE device");
             editor.putBoolean("connected", false);
+            editor.commit();
             MainActivity.toggleConnectionButton();
         }
-        editor.commit();
 
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
@@ -195,7 +198,7 @@ public class BluetoothLeService extends Service {
         // This is special handling for the Heart Rate Measurement profile.  Data parsing is
         // carried out as per profile specifications:
         // http://developer.bluetooth.org/gatt/characteristics/Pages/CharacteristicViewer.aspx?u=org.bluetooth.characteristic.heart_rate_measurement.xml
-        Log.d(TAG, "In broadcast update. characteristic id: " + characteristic.getUuid().toString());
+        ls.logString(TAG, "In broadcast update. characteristic id: " + characteristic.getUuid().toString());
 
         Log.v(TAG, "broadcastUpdate()");
 
@@ -210,7 +213,7 @@ public class BluetoothLeService extends Service {
                 Log.v(TAG, String.format("%02X ", byteChar));
             }
             intent.putExtra(EXTRA_DATA, new String(data));
-            Log.d(TAG, intent.getStringExtra(EXTRA_DATA));
+            ls.logString(TAG, intent.getStringExtra(EXTRA_DATA));
         }
         sendBroadcast(intent);
     }

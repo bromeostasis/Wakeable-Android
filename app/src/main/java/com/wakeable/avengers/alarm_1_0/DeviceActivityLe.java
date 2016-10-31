@@ -129,10 +129,10 @@ public class DeviceActivityLe extends AppCompatActivity {
 //                @Override
 //                public void onLeScan(final BluetoothDevice device, int rssi,
 //                                     byte[] scanRecord) {
-//                    Log.d(TAG, "Device found: " + device.getName());
+//                    ls.logString(TAG, "Device found: " + device.getName());
 //                    if (device.getName().equals("WakeAble")){
 //                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-//                        Log.d(TAG, "Found a WakeAble! Stopping scan");
+//                        ls.logString(TAG, "Found a WakeAble! Stopping scan");
 //                        mBluetoothAddress = device.getAddress();
 //                        editor.putString("macAddress", mBluetoothAddress);
 //                        editor.commit();

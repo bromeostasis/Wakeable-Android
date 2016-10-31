@@ -2,7 +2,9 @@ package com.wakeable.avengers.alarm_1_0;
 
 import android.app.Service;
 import android.content.Intent;
+import android.os.Environment;
 import android.os.IBinder;
+import android.util.Log;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -20,8 +22,9 @@ public class LogService extends Service {
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
-    public void logString(String text){
+    public void logString(String tag, String text){
         File logFile = new File("sdcard/wakeablelog.txt");
+        Log.d(tag, text);
         if (!logFile.exists())
         {
             try
@@ -39,7 +42,7 @@ public class LogService extends Service {
             Date now = new Date();
             //BufferedWriter for performance, true to set append to file flag
             BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(now.toString()).append(": ").append(text);
+            buf.append(now.toString()).append(": ").append(tag).append(": ").append(text);
             buf.newLine();
             buf.close();
         }

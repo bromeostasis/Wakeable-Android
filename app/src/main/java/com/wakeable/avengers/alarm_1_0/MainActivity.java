@@ -33,13 +33,14 @@ import java.util.Calendar;
 
 public class MainActivity extends Activity {
 
+    private static LogService ls = new LogService();
+
+    public static final int requestCode = 9999;
     private static final String TAG = "MainActivity";
-    AlarmManager alarmManager;
+    private static AlarmManager alarmManager;
     private final String PREFS = "preferences";
-    private PendingIntent pendingIntent;
     private TimePicker alarmTimePicker;
     private static MainActivity inst;
-    private TextView alarmTextView;
     private static ToggleButton alarmToggle;
     private static Button connectButton;
     private boolean inForeground = false;
@@ -52,7 +53,7 @@ public class MainActivity extends Activity {
     private boolean mScanning;
     private String mBluetoothAddress;
     private BluetoothLeService mBluetoothLeService;
-    private SharedPreferences prefs;
+    private static SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
     private static final long SCAN_PERIOD = 10000;
@@ -97,7 +98,6 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         alarmTimePicker = (TimePicker) findViewById(R.id.alarmTimePicker);
-        alarmTextView = (TextView) findViewById(R.id.alarmText);
         alarmToggle = (ToggleButton) findViewById(R.id.alarmToggle);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         connectButton = (Button) findViewById(R.id.deviceButton);
@@ -126,6 +126,23 @@ public class MainActivity extends Activity {
             dialog.show();
 
         }
+
+        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        int REQUEST_EXTERNAL_STORAGE = 1;
+        String[] PERMISSIONS_STORAGE = {
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        };
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+            // We don't have permission so prompt the user
+            ActivityCompat.requestPermissions(
+                    inst,
+                    PERMISSIONS_STORAGE,
+                    REQUEST_EXTERNAL_STORAGE
+            );
+        }
         // Bind service
         Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -137,7 +154,9 @@ public class MainActivity extends Activity {
     }
 
     public static void toggleConnectionButton(){
-        if (connectButton.isEnabled()){
+        boolean connected = prefs.getBoolean("connected", false);
+        ls.logString(TAG, "connected value: " + connected);
+        if (connected){
 
             inst.runOnUiThread(new Runnable() {
                 @Override
@@ -164,14 +183,14 @@ public class MainActivity extends Activity {
                 boolean connected = prefs.getBoolean("connected", false);
 
                 if (connected) {
-                    Log.d("MyActivity", "Alarm On");
+                    ls.logString("MyActivity", "Alarm On");
                     Calendar selectedTime = getSelectedTime();
                     Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                    pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
-                    Log.d("MyActivity", String.valueOf(selectedTime.getTime()));
+                    ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                 } else {
-                    Log.d("Main", "Could not connect to bluetooth device. Not setting alarm");
+                    ls.logString("Main", "Could not connect to bluetooth device. Not setting alarm");
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(inst);
                     builder.setMessage("We can't connect to your WakeAble device right now. Maybe your button is out of range or not plugged in? " +
@@ -180,9 +199,9 @@ public class MainActivity extends Activity {
                             public void onClick(DialogInterface dialog, int id) {
                                 Calendar selectedTime = getSelectedTime();
                                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
-                                Log.d("MyActivity", String.valueOf(selectedTime.getTime()));
+                                ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                             }
                         })
                         .setNegativeButton("Thanks, I'll get connected and try again", new DialogInterface.OnClickListener() {
@@ -195,10 +214,16 @@ public class MainActivity extends Activity {
                     dialog.show();
                 }
             } else {
-                alarmManager.cancel(pendingIntent);
-                Log.d("MyActivity", "Alarm Off");
+                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
+                if(pendingIntent != null) {
+                    alarmManager.cancel(pendingIntent);
+                }
+                ls.logString("MyActivity", "Alarm Off");
             }
         } else {
+            Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+            PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
             ((ToggleButton) view).toggle();
             AlertDialog.Builder builder = new AlertDialog.Builder(inst);
             builder.setMessage("You have not configured a device yet. Please connect to WakeAble before trying to set an alarm!!")
@@ -216,9 +241,9 @@ public class MainActivity extends Activity {
         calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
         calendar.set(Calendar.SECOND, 0);
         if (calendar.compareTo(today) < 0) {
-            Log.d("MainActivity", "Let's set this for tomorrow?");
+            ls.logString("MainActivity", "Let's set this for tomorrow?");
             calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
-            Log.d("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+            ls.logString("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
         }
         return calendar;
     }
@@ -282,10 +307,10 @@ public class MainActivity extends Activity {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi,
                                      byte[] scanRecord) {
-                    Log.d(TAG, "Device found: " + device.getName());
+                    ls.logString(TAG, "Device found: " + device.getName());
                     if (device.getName().equals("WakeAble")) {
                         mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                        Log.d(TAG, "Found a WakeAble! Stopping scan");
+                        ls.logString(TAG, "Found a WakeAble! Stopping scan");
                         mBluetoothAddress = device.getAddress();
                         editor.putString("macAddress", mBluetoothAddress);
                         editor.commit();
@@ -323,7 +348,7 @@ public class MainActivity extends Activity {
             if (!address.equals("empty")) {
                 boolean connected = prefs.getBoolean("connected", false);
                 if (!connected) {
-                    Log.d(TAG, "Back from killed state. Let's try to connect to the device");
+                    ls.logString(TAG, "Back from killed state. Let's try to connect to the device");
                     mBluetoothLeService.connect(address, mBluetoothAdapter);
                 }
             }

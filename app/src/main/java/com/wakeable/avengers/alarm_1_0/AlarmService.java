@@ -13,6 +13,7 @@ import android.util.Log;
 
 public class AlarmService extends IntentService {
     private NotificationManager alarmNotificationManager;
+    private static LogService ls = new LogService();
 
     public AlarmService() {
         super("AlarmService");
@@ -25,13 +26,13 @@ public class AlarmService extends IntentService {
 //        Intent i = new Intent(this, MainActivity.class);
 //
 //        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        Log.d("AlarmService", "trying to redirect!");
+//        ls.logString("AlarmService", "trying to redirect!");
 //        startActivity(i);
 //        AlarmReceiver.completeWakefulIntent(intent);
     }
 
     private void sendNotification(String msg) {
-        Log.d("AlarmService", "Preparing to send notification...: " + msg);
+        ls.logString("AlarmService", "Preparing to send notification...: " + msg);
         alarmNotificationManager = (NotificationManager) this
                 .getSystemService(Context.NOTIFICATION_SERVICE);
 
@@ -47,6 +48,6 @@ public class AlarmService extends IntentService {
 
         alamNotificationBuilder.setContentIntent(contentIntent);
         alarmNotificationManager.notify(1, alamNotificationBuilder.build());
-        Log.d("AlarmService", "Notification sent.");
+        ls.logString("AlarmService", "Notification sent.");
     }
 }

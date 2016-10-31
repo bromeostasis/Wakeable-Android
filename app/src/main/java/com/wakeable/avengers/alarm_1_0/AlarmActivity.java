@@ -17,7 +17,13 @@ import android.content.Context;
 import android.view.WindowManager;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.TextView;
+
+import org.w3c.dom.Text;
+
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class AlarmActivity extends AppCompatActivity {
     LogService ls = new LogService();
@@ -25,7 +31,9 @@ public class AlarmActivity extends AppCompatActivity {
     private static final String TAG = "AlarmActivity";
     private final String PREFS="preferences";
     private Button btn;
+    private TextView alarmText;
     private BluetoothAdapter mBluetoothAdapter;
+    private String[] quotes = {"Lorem Ipsum", "example two", "how's it doozit"};
 
 
     // SPP UUID service
@@ -39,7 +47,7 @@ public class AlarmActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        Log.d(TAG, "...In onPause()...");
+        ls.logString(TAG, "...In onPause()...");
         unregisterReceiver(mGattUpdateReceiver);
     }
 
@@ -51,14 +59,13 @@ public class AlarmActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        ls.logString("AlarmActivity: onCreate");
-
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alarm);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        alarmText = (TextView) findViewById(R.id.alarmText);
 
         btn = (Button) findViewById(R.id.button);
 
@@ -69,7 +76,7 @@ public class AlarmActivity extends AppCompatActivity {
 //
 //        String address = prefs.getString("macAddress", "We Fucked UP");
 //        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()){
-//            Log.d(TAG, device.getName() + " found. address: " + device.getAddress());
+//            ls.logString(TAG, device.getName() + " found. address: " + device.getAddress());
 //            if (device.getAddress().equals(address)){
 //                btn.setVisibility(View.INVISIBLE);
 //            }
@@ -80,10 +87,12 @@ public class AlarmActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 
+        int randomIndex = ThreadLocalRandom.current().nextInt(0, quotes.length);
+        alarmText.setText(quotes[randomIndex]);
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
         boolean connected = prefs.getBoolean("connected", true);
 
-        Log.d(TAG, "IN onresume. Visible? " + connected);
+        ls.logString(TAG, "IN onresume. Visible? " + connected);
         if (connected){
             btn.setVisibility(View.INVISIBLE);
         }
@@ -94,7 +103,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     public void turnOffAlarm(View view){
 
-        Log.d(TAG, "turning it off now?!?!");
+        ls.logString(TAG, "turning it off now?!?!");
 
         Context context = view.getContext();
         Intent ringtoneIntent = new Intent(context, RingtoneService.class);
@@ -113,11 +122,11 @@ public class AlarmActivity extends AppCompatActivity {
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Received something: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
+            ls.logString(TAG, "Received something: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
                 if(intent.getStringExtra(BluetoothLeService.EXTRA_DATA).equals("1")){
-                    Log.d(TAG, "Sweet, we got a one! Let's do this thing");
+                    ls.logString(TAG, "Sweet, we got a one! Let's do this thing");
                     turnOffAlarm(btn);
                 }
             }

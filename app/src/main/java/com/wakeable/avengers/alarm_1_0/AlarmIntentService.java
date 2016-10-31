@@ -22,20 +22,14 @@ public class AlarmIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        ls.logString("In AlarmIntentService");
-
         Intent startIntent = new Intent(this, RingtoneService.class);
         this.startService(startIntent);
-
-        ls.logString("AIS: Started ringtone service");
 
         Intent i = new Intent(this, AlarmActivity.class);
         i.putExtra("foreground", intent.getBooleanExtra("foreground", true));
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        ls.logString("AIS: starting AlarmActivity.class");
         startActivity(i);
 
-        ls.logString("AIS: completing wakeful intent");
         AlarmReceiver.completeWakefulIntent(intent);
     }
 

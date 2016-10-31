@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 
 public class BluetoothActivity extends AppCompatActivity {
+    private static LogService ls = new LogService();
     private static final String TAG = "bluetooth2";
 
     TextView txtArduino;
@@ -65,7 +66,7 @@ public class BluetoothActivity extends AppCompatActivity {
 //                            btnOff.setEnabled(true);
 //                            btnOn.setEnabled(true);
                         }
-                        //Log.d(TAG, "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
+                        //ls.logString(TAG, "...String:"+ sb.toString() +  "Byte:" + msg.arg1 + "...");
                         break;
                 }
             }
@@ -92,7 +93,7 @@ public class BluetoothActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
 
-        Log.d(TAG, "...onResume - try connect...");
+        ls.logString(TAG, "...onResume - try connect...");
 
         // Set up a pointer to the remote node using it's address.
         BluetoothDevice device = btAdapter.getRemoteDevice(address);
@@ -113,10 +114,10 @@ public class BluetoothActivity extends AppCompatActivity {
         btAdapter.cancelDiscovery();
 
         // Establish the connection.  This will block until it connects.
-        Log.d(TAG, "...Connecting...");
+        ls.logString(TAG, "...Connecting...");
         try {
             btSocket.connect();
-            Log.d(TAG, "....Connection ok...");
+            ls.logString(TAG, "....Connection ok...");
         } catch (IOException e) {
             try {
                 btSocket.close();
@@ -130,7 +131,7 @@ public class BluetoothActivity extends AppCompatActivity {
         ct.start();
 
         // Create a data stream so we can talk to server.
-        Log.d(TAG, "...Create Socket...");
+        ls.logString(TAG, "...Create Socket...");
 
     }
 
@@ -138,7 +139,7 @@ public class BluetoothActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
 
-        Log.d(TAG, "...In onPause()...");
+        ls.logString(TAG, "...In onPause()...");
 
         ct.cancel();
 
@@ -156,7 +157,7 @@ public class BluetoothActivity extends AppCompatActivity {
             errorExit("Fatal Error", "Bluetooth not support");
         } else {
             if (btAdapter.isEnabled()) {
-                Log.d(TAG, "...Bluetooth ON...");
+                ls.logString(TAG, "...Bluetooth ON...");
             } else {
                 //Prompt user to turn on Bluetooth
                 Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
@@ -186,7 +187,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
             } catch (IOException e) {
-                Log.d(TAG, e.toString());
+                ls.logString(TAG, e.toString());
             }
 
             mmInStream = tmpIn;
@@ -202,7 +203,7 @@ public class BluetoothActivity extends AppCompatActivity {
                 try {
                     // Read from the InputStream
                     bytes = mmInStream.read(buffer);        // Get number of bytes and message in "buffer"
-                    Log.d(TAG, new String(buffer));
+                    ls.logString(TAG, new String(buffer));
                     h.obtainMessage(RECIEVE_MESSAGE, bytes, -1, buffer).sendToTarget();     // Send to message queue Handler
                 } catch (IOException e) {
                     break;
