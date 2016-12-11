@@ -87,6 +87,7 @@ public class MainActivity extends Activity {
 
         if (prefs.getString("macAddress", "empty").equals("empty")) {
             ls.logString(TAG, "No address set, sending them to setup page.");
+            onResume();
             Intent setup = new Intent(this, SetupActivity.class);
             startActivity(setup);
         }

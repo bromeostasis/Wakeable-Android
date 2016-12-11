@@ -120,7 +120,7 @@ public class SetupActivity extends AppCompatActivity {
                             editor.commit();
 
                             AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                            builder.setMessage("We found a Wakeable with serial code" + device.getAddress() + ". Do you want to connect and go to your alarm?")
+                            builder.setMessage("We found a Wakeable with serial code " + device.getAddress() + ". Do you want to connect and go to your alarm?")
                                     .setPositiveButton("Let's do it!", new DialogInterface.OnClickListener() {
                                         public void onClick(DialogInterface dialog, int id) {
                                             mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
