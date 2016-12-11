@@ -5,7 +5,6 @@ import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -13,7 +12,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -204,20 +202,6 @@ public class MainActivity extends Activity {
     }
 
 
-    private Calendar getSelectedTime(){
-        Calendar today = Calendar.getInstance();
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
-        calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
-        calendar.set(Calendar.SECOND, 0);
-        if (calendar.compareTo(today) < 0) {
-            ls.logString("MainActivity", "Let's set this for tomorrow?");
-            calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
-            ls.logString("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
-        }
-        return calendar;
-    }
-
     public boolean isInForeground() {
         return inForeground;
     }
@@ -236,6 +220,22 @@ public class MainActivity extends Activity {
                 toggleConnectionButton();
             }
         }
+    }
+
+
+
+    private Calendar getSelectedTime(){
+        Calendar today = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, alarmTimePicker.getCurrentHour());
+        calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
+        calendar.set(Calendar.SECOND, 0);
+        if (calendar.compareTo(today) < 0) {
+            ls.logString("MainActivity", "Let's set this for tomorrow?");
+            calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
+            ls.logString("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
+        }
+        return calendar;
     }
 
     private void checkConnectionAfterWait(final boolean showMessage, int amtOfTime){
@@ -262,44 +262,6 @@ public class MainActivity extends Activity {
             }
         }, amtOfTime);
     }
-
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi,
-                                     byte[] scanRecord) {
-                    if(device != null) {
-                        ls.logString(TAG, "Device found: " + device.getName());
-                        String deviceName = device.getName();
-                        if (deviceName != null && deviceName.toLowerCase().equals("wakeable")) {
-                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                            ls.logString(TAG, "Found a WakeAble! Stopping scan");
-                            mBluetoothAddress = device.getAddress();
-                            editor.putString("macAddress", mBluetoothAddress);
-                            editor.commit();
-
-                            // Use the Builder class for convenient dialog construction
-                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                            builder.setMessage("Found device with name " + deviceName + " and address " + device.getAddress() + ". Do you want to connect?")
-                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
-                                        }
-                                    })
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // User cancelled the dialog
-                                        }
-                                    });
-                            builder.create().show();
-
-                        }
-                    }
-                }
-            };
-
-
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
