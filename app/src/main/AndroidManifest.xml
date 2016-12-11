@@ -84,7 +84,9 @@
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".SetupActivity"></activity>
+        <activity android:name=".SetupActivity"
+            android:theme="@style/AppTheme.NoActionBar">
+        </activity>
     </application>
 
 </manifest>
