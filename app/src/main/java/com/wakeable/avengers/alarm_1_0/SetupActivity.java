@@ -152,7 +152,7 @@ public class SetupActivity extends AppCompatActivity {
                                         public void onClick(DialogInterface dialog, int id) {
                                             // User cancelled the dialog
 
-                                            editor.remove("macAddress");
+                                            editor.putString("macAddress", "placeholder");
                                             editor.commit();
                                         }
                                     });
