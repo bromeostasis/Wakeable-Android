@@ -30,7 +30,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     private static final String TAG = "AlarmActivity";
     private final String PREFS="preferences";
-    private Button bftn;
+    private Button btn;
     private TextView alarmText;
     private BluetoothAdapter mBluetoothAdapter;
     private String[] quotes = getResources().getStringArray(R.array.wakeup_texts);
