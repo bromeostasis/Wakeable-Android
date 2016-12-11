@@ -37,7 +37,7 @@ public class MainActivity extends Activity {
     private static TextView status;
     private static MainActivity inst;
     private static ToggleButton alarmToggle;
-    private static Button connectButton;
+    private static Button reconnectButton;
     private boolean inForeground = false;
 
     private Handler mHandler;
@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
         alarmTimePicker = (TimePicker) findViewById(R.id.alarmTimePicker);
         alarmToggle = (ToggleButton) findViewById(R.id.alarmToggle);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        connectButton = (Button) findViewById(R.id.deviceButton);
+        reconnectButton = (Button) findViewById(R.id.reconnect);
         status = (TextView) findViewById(R.id.status);
 
 
@@ -134,7 +134,7 @@ public class MainActivity extends Activity {
             inst.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectButton.setVisibility(View.INVISIBLE);
+                    reconnectButton.setVisibility(View.INVISIBLE);
                     status.setText(R.string.connected);
                 }
             });
@@ -143,7 +143,7 @@ public class MainActivity extends Activity {
             inst.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectButton.setVisibility(View.VISIBLE);
+                    reconnectButton.setVisibility(View.VISIBLE);
                     status.setText(R.string.connection_required);
                 }
             });
@@ -228,55 +228,47 @@ public class MainActivity extends Activity {
         return inForeground;
     }
 
-    public void onDeviceClicked(final View view) {
+    public void reconnect(final View view) {
 
         String address = prefs.getString("macAddress", "empty");
+        if (!address.equals("empty")) {
+            boolean connected = prefs.getBoolean("connected", false);
+            if (!connected) {
+                mBluetoothLeService.connect(address, mBluetoothAdapter);
+                checkConnectionAfterWait(true);
+            }
+            else{
+                ls.logString(TAG, "How did they click this? Just resetting the button");
+                toggleConnectionButton();
+            }
+        }
+    }
 
-        if (address.equals("empty")){
-            mHandler = new Handler();
-            mHandler.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    String address = prefs.getString("macAddress", "empty");
-                    if (address.equals("empty")){
+    private void checkConnectionAfterWait(final boolean showMessage){
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                toggleConnectionButton();
+                boolean connected = prefs.getBoolean("connected", false);
+                if (!connected) {
+                    ls.logString(TAG, "Reconnect failed");
+                    if (showMessage) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-                        builder.setMessage("Couldn't find a WakeAble device. Make sure your device is plugged in and close by!")
-                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        builder.setMessage(R.string.reconnect_fail)
+                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
-
                                     }
                                 });
                         AlertDialog dialog = builder.create();
                         dialog.show();
                     }
                 }
-            }, SCAN_PERIOD);
 
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        }
-        else {
-            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-            builder.setMessage("We already have a WakeAble device configured with address " + address + ". Unless you're trying to switch devices, you likely just need to plug your device in, move it closer to your phone, or turn bluetooth on.")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-
-                    }
-                })
-                .setNegativeButton("I want to switch my device", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        editor.remove("macAddress");
-                        editor.commit();
-                        onDeviceClicked(view);
-                    }
-                });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-        }
-
+            }
+        }, SCAN_PERIOD);
     }
+
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -329,6 +321,7 @@ public class MainActivity extends Activity {
                 if (!connected) {
                     ls.logString(TAG, "Back from killed state. Let's try to connect to the device");
                     mBluetoothLeService.connect(address, mBluetoothAdapter);
+                    checkConnectionAfterWait(false);
                 }
             }
         }
