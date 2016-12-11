@@ -39,6 +39,8 @@ public class SetupActivity extends AppCompatActivity {
 
     private static final long SCAN_PERIOD = 5000;
     private final String PREFS = "preferences";
+    private final int LOGS_REQUEST_CODE = 122;
+    private final int BT_REQUEST_CODE = 39;
 
     @Override
     protected void onDestroy() {
@@ -76,29 +78,45 @@ public class SetupActivity extends AppCompatActivity {
 
 
     public void findWakeable(final View view){
-        mHandler = new Handler();
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScanning = false;
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                String address = prefs.getString("macAddress", "empty");
-                if (address.equals("empty")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                    builder.setMessage("Oh dear, it looks like wakeable had a problem connecting. Try moving closer to the device and confirming that the bluetooth on your phone is on.")
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
 
-                                }
-                            });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
+        // Make sure we have location permissions
+        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+            builder.setMessage("Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for Wakeable to find your device.")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            ActivityCompat.requestPermissions(SetupActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BT_REQUEST_CODE);
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        }
+        else {
+            mHandler = new Handler();
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                    String address = prefs.getString("macAddress", "empty");
+                    if (address.equals("empty")) {
+                        AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                        builder.setMessage("Oh dear, it looks like wakeable had a problem connecting. Try moving closer to the device and confirming that the bluetooth on your phone is on.")
+                                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+
+                                    }
+                                });
+                        AlertDialog dialog = builder.create();
+                        dialog.show();
+                    }
                 }
-            }
-        }, SCAN_PERIOD);
+            }, SCAN_PERIOD);
 
-        mScanning = true;
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+        }
     }
 
     // Device scan callback.
@@ -160,6 +178,23 @@ public class SetupActivity extends AppCompatActivity {
     };
 
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+
+        if (grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            switch (requestCode) {
+                case BT_REQUEST_CODE: {
+                    findWakeable(snoozeButton);
+                }
+                default: {
+                    ls.logString(TAG, "Weird request code returned.");
+                }
+            }
+        }
+    }
+
     private void requestPermissions() {
 
 
@@ -173,7 +208,6 @@ public class SetupActivity extends AppCompatActivity {
             builder.setMessage("Wakeable stores app logs so the team can help you if you run into any issues. Please accept the following prompt to help us help you!")
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
-                            int REQUEST_EXTERNAL_STORAGE = 1;
                             String[] PERMISSIONS_STORAGE = {
                                     Manifest.permission.READ_EXTERNAL_STORAGE,
                                     Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -182,26 +216,12 @@ public class SetupActivity extends AppCompatActivity {
                             ActivityCompat.requestPermissions(
                                     SetupActivity.this,
                                     PERMISSIONS_STORAGE,
-                                    REQUEST_EXTERNAL_STORAGE
+                                    LOGS_REQUEST_CODE
                             );
                         }
                     });
             AlertDialog dialog = builder.create();
             dialog.show();
-        }
-
-        // Make sure we have location permissions
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-            builder.setMessage("Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for WakeAble to work correctly!")
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int id) {
-                            ActivityCompat.requestPermissions(SetupActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-                        }
-                    });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
         }
     }
 }
