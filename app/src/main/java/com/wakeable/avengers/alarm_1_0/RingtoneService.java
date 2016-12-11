@@ -53,5 +53,6 @@ public class RingtoneService extends Service {
         mPlayer.stop();
         vibrator.cancel();
         am.setStreamVolume(AudioManager.STREAM_MUSIC, previousVolume, 0);
+        mPlayer.release();
     }
 }

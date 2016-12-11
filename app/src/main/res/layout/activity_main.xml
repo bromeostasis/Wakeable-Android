@@ -51,26 +51,45 @@
 
 
 
+
+    <ImageView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:adjustViewBounds="true"
+        android:id="@+id/imageStatus"
+        android:src="@drawable/bluetooth"
+        android:layout_toLeftOf="@+id/status"
+        android:layout_alignBottom="@id/status"
+        android:layout_alignTop="@id/status" />
+
+
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Connect to WakeAble"
+        android:text="reconnect"
         android:background="@drawable/button"
         android:id="@+id/deviceButton"
         android:onClick="onDeviceClicked"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:textColor="#5d5f5c"
+        android:visibility="invisible"
         android:paddingLeft="10dp"
         android:paddingRight="10dp" />
 
-    <ImageView
+    <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:id="@+id/imageView"
-        android:src="@android:drawable/stat_sys_data_bluetooth"
-        android:layout_toLeftOf="@+id/deviceButton"
-        android:layout_alignBottom="@id/deviceButton"
-        android:layout_alignTop="@id/deviceButton" />
+        android:text="you're good to go"
+        android:id="@+id/status"
+        android:textSize="22sp"
+        android:paddingRight="40dp"
+        android:textColor="#FFFFFF"
+        android:layout_above="@id/deviceButton"
+        android:maxLines="1"
+        android:ellipsize="none"
+        android:layout_alignParentRight="true"
+        android:layout_marginBottom="20dp"
+        android:textIsSelectable="true"
+        android:gravity="center"/>
 </RelativeLayout>

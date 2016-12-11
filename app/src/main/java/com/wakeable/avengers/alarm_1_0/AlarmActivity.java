@@ -53,7 +53,6 @@ public class AlarmActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
         super.onStart();
     }
 
@@ -86,6 +85,7 @@ public class AlarmActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 
         int randomIndex = ThreadLocalRandom.current().nextInt(0, quotes.length);
         alarmText.setText(quotes[randomIndex]);
@@ -125,9 +125,12 @@ public class AlarmActivity extends AppCompatActivity {
             ls.logString(TAG, "Received something: " + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_DATA_AVAILABLE.equals(action)) {
-                if(intent.getStringExtra(BluetoothLeService.EXTRA_DATA).equals("1")){
+                if(intent.getStringExtra(BluetoothLeService.EXTRA_DATA).contains("1")){
                     ls.logString(TAG, "Sweet, we got a one! Let's do this thing");
                     turnOffAlarm(btn);
+                }
+                else{
+                    ls.logString(TAG, "What's the ferkin data?" + intent.getStringExtra(BluetoothLeService.EXTRA_DATA));
                 }
             }
         }

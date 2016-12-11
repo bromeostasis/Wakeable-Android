@@ -4,6 +4,6 @@
     <string name="title_activity_alarm">AlarmActivity</string>
     <string name="title_activity_bluetooth">BluetoothActivity</string>
     <string name="title_activity_device_activity_le">DeviceActivityLe</string>
-    <string name="connection_required">Connect to WakeAble</string>
-    <string name="connected">WakeAble is connected</string>
+    <string name="connection_required">houston, we have a problem</string>
+    <string name="connected">you\'re good to go</string>
 </resources>

@@ -82,7 +82,9 @@
         <service
             android:name=".BluetoothLeService"
             android:enabled="true"
-            android:exported="true"></service>
+            android:exported="true" />
+
+        <activity android:name=".SetupActivity"></activity>
     </application>
 
 </manifest>

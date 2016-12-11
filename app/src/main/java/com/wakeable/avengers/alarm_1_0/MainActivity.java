@@ -33,6 +33,8 @@ import java.util.Calendar;
 
 public class MainActivity extends Activity {
 
+
+    private static PendingIntent pendingIntent;
     private static LogService ls = new LogService();
 
     public static final int requestCode = 9999;
@@ -40,6 +42,7 @@ public class MainActivity extends Activity {
     private static AlarmManager alarmManager;
     private final String PREFS = "preferences";
     private TimePicker alarmTimePicker;
+    private static TextView status;
     private static MainActivity inst;
     private static ToggleButton alarmToggle;
     private static Button connectButton;
@@ -90,6 +93,12 @@ public class MainActivity extends Activity {
 
         prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
 
+        if (prefs.getString("macAddress", "empty").equals("empty")) {
+            ls.logString(TAG, "No address set, sending them to setup page.");
+            Intent setup = new Intent(this, SetupActivity.class);
+            startActivity(setup);
+        }
+
         editor = prefs.edit();
         editor.remove("connected");
         editor.commit();
@@ -101,6 +110,7 @@ public class MainActivity extends Activity {
         alarmToggle = (ToggleButton) findViewById(R.id.alarmToggle);
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         connectButton = (Button) findViewById(R.id.deviceButton);
+        status = (TextView) findViewById(R.id.status);
 
 
         // Initializes Bluetooth adapter.
@@ -113,36 +123,6 @@ public class MainActivity extends Activity {
             startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         }
 
-        // Make sure we have location permissions
-        if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-            builder.setMessage("Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for WakeAble to work correctly!")
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        ActivityCompat.requestPermissions(inst, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 123);
-                    }
-                });
-            AlertDialog dialog = builder.create();
-            dialog.show();
-
-        }
-
-        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        int REQUEST_EXTERNAL_STORAGE = 1;
-        String[] PERMISSIONS_STORAGE = {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    inst,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
         // Bind service
         Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -161,8 +141,8 @@ public class MainActivity extends Activity {
             inst.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectButton.setEnabled(false);
-                    connectButton.setText(R.string.connected);
+                    connectButton.setVisibility(View.INVISIBLE);
+                    status.setText(R.string.connected);
                 }
             });
         }
@@ -170,8 +150,8 @@ public class MainActivity extends Activity {
             inst.runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    connectButton.setEnabled(true);
-                    connectButton.setText(R.string.connection_required);
+                    connectButton.setVisibility(View.VISIBLE);
+                    status.setText(R.string.connection_required);
                 }
             });
         }
@@ -186,7 +166,8 @@ public class MainActivity extends Activity {
                     ls.logString("MyActivity", "Alarm On");
                     Calendar selectedTime = getSelectedTime();
                     Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                    pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+//                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                     alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                     ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                 } else {
@@ -199,7 +180,8 @@ public class MainActivity extends Activity {
                             public void onClick(DialogInterface dialog, int id) {
                                 Calendar selectedTime = getSelectedTime();
                                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                                 ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                             }
@@ -214,11 +196,12 @@ public class MainActivity extends Activity {
                     dialog.show();
                 }
             } else {
-                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
-                if(pendingIntent != null) {
-                    alarmManager.cancel(pendingIntent);
-                }
+//                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+//                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
+//                if(pendingIntent != null) {
+//                    alarmManager.cancel(pendingIntent);
+//                }
+                alarmManager.cancel(pendingIntent);
                 ls.logString("MyActivity", "Alarm Off");
             }
         } else {
@@ -307,29 +290,32 @@ public class MainActivity extends Activity {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi,
                                      byte[] scanRecord) {
-                    ls.logString(TAG, "Device found: " + device.getName());
-                    if (device.getName().equals("WakeAble")) {
-                        mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                        ls.logString(TAG, "Found a WakeAble! Stopping scan");
-                        mBluetoothAddress = device.getAddress();
-                        editor.putString("macAddress", mBluetoothAddress);
-                        editor.commit();
+                    if(device != null) {
+                        ls.logString(TAG, "Device found: " + device.getName());
+                        String deviceName = device.getName();
+                        if (deviceName != null && deviceName.toLowerCase().equals("wakeable")) {
+                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                            ls.logString(TAG, "Found a WakeAble! Stopping scan");
+                            mBluetoothAddress = device.getAddress();
+                            editor.putString("macAddress", mBluetoothAddress);
+                            editor.commit();
 
-                        // Use the Builder class for convenient dialog construction
-                        AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
-                        builder.setMessage("Found device with name " + device.getName() + " and address " + device.getAddress() + ". Do you want to connect?")
-                                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
-                                    }
-                                })
-                                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                    public void onClick(DialogInterface dialog, int id) {
-                                        // User cancelled the dialog
-                                    }
-                                });
-                        builder.create().show();
+                            // Use the Builder class for convenient dialog construction
+                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                            builder.setMessage("Found device with name " + deviceName + " and address " + device.getAddress() + ". Do you want to connect?")
+                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
+                                        }
+                                    })
+                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // User cancelled the dialog
+                                        }
+                                    });
+                            builder.create().show();
 
+                        }
                     }
                 }
             };
