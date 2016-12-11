@@ -82,7 +82,7 @@ public class SetupActivity extends AppCompatActivity {
         // Make sure we have location permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-            builder.setMessage("Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for Wakeable to find your device.")
+            builder.setMessage(R.string.bt_permission_request)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             ActivityCompat.requestPermissions(SetupActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, BT_REQUEST_CODE);
@@ -102,7 +102,7 @@ public class SetupActivity extends AppCompatActivity {
                     String address = prefs.getString("macAddress", "empty");
                     if (address.equals("empty")) {
                         AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                        builder.setMessage("Oh dear, it looks like wakeable had a problem connecting. Try moving closer to the device and confirming that the bluetooth on your phone is on.")
+                        builder.setMessage(R.string.setup_fail)
                                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                                     public void onClick(DialogInterface dialog, int id) {
 
@@ -188,6 +188,9 @@ public class SetupActivity extends AppCompatActivity {
                 case BT_REQUEST_CODE: {
                     findWakeable(snoozeButton);
                 }
+                case LOGS_REQUEST_CODE: {
+                    ls.logString(TAG, "Sweet, they want to log!");
+                }
                 default: {
                     ls.logString(TAG, "Weird request code returned.");
                 }
@@ -205,7 +208,7 @@ public class SetupActivity extends AppCompatActivity {
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-            builder.setMessage("Wakeable stores app logs so the team can help you if you run into any issues. Please accept the following prompt to help us help you!")
+            builder.setMessage(R.string.log_permission_request)
                     .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             String[] PERMISSIONS_STORAGE = {

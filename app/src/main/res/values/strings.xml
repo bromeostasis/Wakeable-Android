@@ -11,4 +11,7 @@
     <string name="set_without_connection">Head\'s up: you\'re not connected to Wakeable, but you just turned on your alarm.</string>
     <string name="reconnect_first">Got it, I will try to reconnect first.</string>
     <string name="set_anyway">Set my alarm anyway, I\'ll connect to my device later.</string>
+    <string name="setup_fail">Oh dear, it looks like wakeable had a problem connecting. Try moving closer to the device and confirming that the bluetooth on your phone is on.</string>
+    <string name="bt_permission_request">Android requires usage of location data to scan for bluetooth devices. Please accept the following prompt in order for Wakeable to find your device.</string>
+    <string name="log_permission_request">Wakeable stores app logs so the team can help you if you run into any issues. Please accept the following prompt to help us help you!</string>
 </resources>

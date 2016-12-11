@@ -157,60 +157,49 @@ public class MainActivity extends Activity {
     }
 
     public void onToggleClicked(final View view) {
-        if (!prefs.getString("macAddress", "empty").equals("empty")) {
-            if (((ToggleButton) view).isChecked()) {
-                boolean connected = prefs.getBoolean("connected", false);
+        if (((ToggleButton) view).isChecked()) {
+            boolean connected = prefs.getBoolean("connected", false);
 
-                if (connected) {
-                    ls.logString("MyActivity", "Alarm On");
-                    Calendar selectedTime = getSelectedTime();
-                    Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                    pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+            if (connected) {
+                ls.logString("MyActivity", "Alarm On");
+                Calendar selectedTime = getSelectedTime();
+                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
 //                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
-                    ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
-                } else {
-                    ls.logString("Main", "Could not connect to bluetooth device. Not setting alarm");
-
-                    AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-                    builder.setMessage(R.string.set_without_connection)
-                        .setPositiveButton(R.string.set_anyway, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                Calendar selectedTime = getSelectedTime();
-                                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-                                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-                                alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
-                                ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
-                            }
-                        })
-                        .setNegativeButton(R.string.reconnect_first, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int id) {
-                                // User cancelled the dialog
-                                ((ToggleButton) view).toggle();
-                            }
-                        });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
+                ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
             } else {
+                ls.logString("Main", "Could not connect to bluetooth device. Not setting alarm");
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(inst);
+                builder.setMessage(R.string.set_without_connection)
+                    .setPositiveButton(R.string.set_anyway, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            Calendar selectedTime = getSelectedTime();
+                            Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+                            pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
+                            ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
+                        }
+                    })
+                    .setNegativeButton(R.string.reconnect_first, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            // User cancelled the dialog
+                            ((ToggleButton) view).toggle();
+                        }
+                    });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        } else {
 //                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
 //                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
 //                if(pendingIntent != null) {
 //                    alarmManager.cancel(pendingIntent);
 //                }
-                alarmManager.cancel(pendingIntent);
-                ls.logString("MyActivity", "Alarm Off");
-            }
-        } else {
-            Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-            ((ToggleButton) view).toggle();
-            AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-            builder.setMessage("You have not configured a device yet. Please connect to WakeAble before trying to set an alarm!!")
-            .setPositiveButton("Ok", new DialogInterface.OnClickListener() {public void onClick(DialogInterface dialog, int id) {}});
-            AlertDialog dialog = builder.create();
-            dialog.show();
+            alarmManager.cancel(pendingIntent);
+            ls.logString("MyActivity", "Alarm Off");
         }
     }
 
