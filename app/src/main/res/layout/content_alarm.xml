@@ -17,9 +17,9 @@
         android:layout_height="wrap_content"
         android:text="Oh GOD turn it off"
         android:id="@+id/button"
+        android:visibility="invisible"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="86dp"
         android:textColor="#5d5f5c"
         android:background="@drawable/button"
         android:paddingLeft="5dp"
@@ -27,11 +27,45 @@
         android:onClick="turnOffAlarm" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:id="@+id/alarmText"
-        android:layout_above="@+id/button"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="157dp" />
+        android:textAlignment="center"
+        android:id="@+id/alarmText"
+        android:text="Good morning!\n You look beautiful today"
+        android:layout_alignParentTop="true"
+        android:textColor="#FFFFFF"
+        />
+
+    <TextView
+        android:layout_width="240dp"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:id="@+id/alarmDirections"
+        android:text="@string/alarm_instructions"
+        android:textSize="18dp"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentBottom="true"
+        android:textAlignment="textEnd"
+        android:textColor="#FFFFFF"
+        />
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dip"
+        android:layout_alignParentEnd="true"
+        android:layout_alignLeft="@id/alarmDirections"
+        android:background="#FFFFFF"
+        android:layout_above="@id/alarmDirections"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/hr" />
+
+    <ImageView
+        android:layout_width="360dp"
+        android:layout_height="360dp"
+        android:layout_marginTop="15dp"
+        android:id="@+id/bedroom"
+        android:layout_above="@+id/hr"
+        android:src="@drawable/bedroom"
+        android:layout_centerHorizontal="true" />
 </RelativeLayout>

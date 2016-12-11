@@ -6,4 +6,5 @@
     <string name="title_activity_device_activity_le">DeviceActivityLe</string>
     <string name="connection_required">houston, we have a problem</string>
     <string name="connected">you\'re good to go</string>
+    <string name="alarm_instructions">Press the physical Wakeable button to turn off your alarm.</string>
 </resources>

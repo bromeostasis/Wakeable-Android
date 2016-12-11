@@ -56,7 +56,111 @@ public class SetupActivity extends AppCompatActivity {
         prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
         editor = prefs.edit();
 
+        requestPermissions();
 
+
+        // Initializes Bluetooth adapter.
+        final BluetoothManager bluetoothManager =
+                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = bluetoothManager.getAdapter();
+
+        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+
+        Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+
+    }
+
+
+    public void findWakeable(final View view){
+        mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mScanning = false;
+                mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                String address = prefs.getString("macAddress", "empty");
+                if (address.equals("empty")){
+                    AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                    builder.setMessage("Oh dear, it looks like wakeable had a problem connecting. Try moving closer to the device and confirming that the bluetooth on your phone is on.")
+                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
+                }
+            }
+        }, SCAN_PERIOD);
+
+        mScanning = true;
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
+    }
+
+    // Device scan callback.
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
+                    if(device != null) {
+                        ls.logString(TAG, "Device found: " + device.getName());
+                        String deviceName = device.getName();
+                        if (deviceName != null && deviceName.toLowerCase().equals("wakeable")) {
+                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                            ls.logString(TAG, "Found a WakeAble! Stopping scan");
+
+                            // Storing address so we don't show the dialog saying scan failed
+                            mBluetoothAddress = device.getAddress();
+                            editor.putString("macAddress", mBluetoothAddress);
+                            editor.commit();
+
+                            AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+                            builder.setMessage("We found a Wakeable with serial code" + device.getAddress() + ". Do you want to connect and go to your alarm?")
+                                    .setPositiveButton("Let's do it!", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
+
+
+                                            Intent home = new Intent(SetupActivity.this, MainActivity.class);
+                                            startActivity(home);
+                                        }
+                                    })
+                                    .setNegativeButton("Not now", new DialogInterface.OnClickListener() {
+                                        public void onClick(DialogInterface dialog, int id) {
+                                            // User cancelled the dialog
+
+                                            editor.remove("macAddress");
+                                            editor.commit();
+                                        }
+                                    });
+                            builder.create().show();
+
+                        }
+                    }
+                }
+            };
+
+    // Code to manage Service lifecycle.
+    private final ServiceConnection mServiceConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName componentName, IBinder service) {
+            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName componentName) {
+            mBluetoothLeService = null;
+        }
+    };
+
+
+    private void requestPermissions() {
         // Make sure we have location permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
@@ -87,101 +191,6 @@ public class SetupActivity extends AppCompatActivity {
                     REQUEST_EXTERNAL_STORAGE
             );
         }
-        // Bind service
-        // Initializes Bluetooth adapter.
-        final BluetoothManager bluetoothManager =
-                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter = bluetoothManager.getAdapter();
-
-        if (mBluetoothAdapter == null || !mBluetoothAdapter.isEnabled()) {
-            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-        }
-        Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
     }
-
-    public void findWakeable(final View view){
-        mHandler = new Handler();
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                mScanning = false;
-                mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                String address = prefs.getString("macAddress", "empty");
-                if (address.equals("empty")){
-                    AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                    builder.setMessage("Couldn't find a WakeAble device. Make sure your device is plugged in and close by!")
-                            .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-
-                                }
-                            });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                }
-                else{
-                    ls.logString(TAG, "Yay we did it!");
-                    Intent home = new Intent(SetupActivity.this, MainActivity.class);
-                    startActivity(home);
-                }
-            }
-        }, SCAN_PERIOD);
-
-        mScanning = true;
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
-    }
-
-    // Device scan callback.
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-            new BluetoothAdapter.LeScanCallback() {
-                @Override
-                public void onLeScan(final BluetoothDevice device, int rssi,
-                                     byte[] scanRecord) {
-                    if(device != null) {
-                        ls.logString(TAG, "Device found: " + device.getName());
-                        String deviceName = device.getName();
-                        if (deviceName != null && deviceName.toLowerCase().equals("wakeable")) {
-                            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                            ls.logString(TAG, "Found a WakeAble! Stopping scan");
-
-                            // Use the Builder class for convenient dialog construction
-                            AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
-                            builder.setMessage("Found device with name " + deviceName + " and address " + device.getAddress() + ". Do you want to connect?")
-                                    .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            mBluetoothLeService.connect(mBluetoothAddress, mBluetoothAdapter);
-
-                                            mBluetoothAddress = device.getAddress();
-                                            editor.putString("macAddress", mBluetoothAddress);
-                                            editor.commit();
-                                        }
-                                    })
-                                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int id) {
-                                            // User cancelled the dialog
-                                        }
-                                    });
-                            builder.create().show();
-
-                        }
-                    }
-                }
-            };
-
-    // Code to manage Service lifecycle.
-    private final ServiceConnection mServiceConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName componentName, IBinder service) {
-            mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName componentName) {
-            mBluetoothLeService = null;
-        }
-    };
 
 }
