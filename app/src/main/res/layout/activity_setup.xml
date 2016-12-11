@@ -90,7 +90,7 @@
         android:onClick="findWakeable"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:textColor="#5d5f5c"
+        android:textColor="@color/charcoal"
         android:background="@drawable/button"
         android:paddingLeft="10dp"
         android:paddingRight="10dp" />

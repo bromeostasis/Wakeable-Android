@@ -13,10 +13,12 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.ToggleButton;
@@ -38,6 +40,7 @@ public class MainActivity extends Activity {
     private static MainActivity inst;
     private static ToggleButton alarmToggle;
     private static Button reconnectButton;
+    private static ImageView imageStatus;
     private boolean inForeground = false;
 
     private Handler mHandler;
@@ -51,7 +54,8 @@ public class MainActivity extends Activity {
     private static SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
-    private static final long SCAN_PERIOD = 10000;
+    private static final int SCAN_PERIOD = 5000;
+    private static final int STARTUP_SCAN_PERIOD= 2000;
 
 
     public static MainActivity instance() {
@@ -86,7 +90,6 @@ public class MainActivity extends Activity {
         prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
 
         if (prefs.getString("macAddress", "empty").equals("empty")) {
-            ls.logString(TAG, "No address set, sending them to setup page.");
             onResume();
             Intent setup = new Intent(this, SetupActivity.class);
             startActivity(setup);
@@ -104,6 +107,7 @@ public class MainActivity extends Activity {
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         reconnectButton = (Button) findViewById(R.id.reconnect);
         status = (TextView) findViewById(R.id.status);
+        imageStatus = (ImageView) findViewById(R.id.imageStatus);
 
 
         // Initializes Bluetooth adapter.
@@ -136,6 +140,7 @@ public class MainActivity extends Activity {
                 public void run() {
                     reconnectButton.setVisibility(View.INVISIBLE);
                     status.setText(R.string.connected);
+                    imageStatus.setImageResource(R.drawable.bluetooth);
                 }
             });
         }
@@ -145,6 +150,7 @@ public class MainActivity extends Activity {
                 public void run() {
                     reconnectButton.setVisibility(View.VISIBLE);
                     status.setText(R.string.connection_required);
+                    imageStatus.setImageResource(R.drawable.exclamation);
                 }
             });
         }
@@ -235,7 +241,7 @@ public class MainActivity extends Activity {
             boolean connected = prefs.getBoolean("connected", false);
             if (!connected) {
                 mBluetoothLeService.connect(address, mBluetoothAdapter);
-                checkConnectionAfterWait(true);
+                checkConnectionAfterWait(true, SCAN_PERIOD);
             }
             else{
                 ls.logString(TAG, "How did they click this? Just resetting the button");
@@ -244,7 +250,7 @@ public class MainActivity extends Activity {
         }
     }
 
-    private void checkConnectionAfterWait(final boolean showMessage){
+    private void checkConnectionAfterWait(final boolean showMessage, int amtOfTime){
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -266,7 +272,7 @@ public class MainActivity extends Activity {
                 }
 
             }
-        }, SCAN_PERIOD);
+        }, amtOfTime);
     }
 
     // Device scan callback.
@@ -321,7 +327,7 @@ public class MainActivity extends Activity {
                 if (!connected) {
                     ls.logString(TAG, "Back from killed state. Let's try to connect to the device");
                     mBluetoothLeService.connect(address, mBluetoothAdapter);
-                    checkConnectionAfterWait(false);
+                    checkConnectionAfterWait(false, STARTUP_SCAN_PERIOD);
                 }
             }
         }

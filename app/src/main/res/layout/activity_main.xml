@@ -2,7 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#85d3e4"
+    android:background="@color/teal"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
@@ -43,7 +43,7 @@
         android:text="Alarm On/Off"
         android:background="@drawable/button"
         android:id="@+id/alarmToggle"
-        android:textColor="#5d5f5c"
+        android:textColor="@color/charcoal"
         android:onClick="onToggleClicked"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
@@ -51,16 +51,6 @@
 
 
 
-
-    <ImageView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:adjustViewBounds="true"
-        android:id="@+id/imageStatus"
-        android:src="@drawable/bluetooth"
-        android:layout_toLeftOf="@+id/status"
-        android:layout_alignBottom="@id/status"
-        android:layout_alignTop="@id/status" />
 
 
     <Button
@@ -72,24 +62,36 @@
         android:onClick="reconnect"
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:textColor="#5d5f5c"
+        android:textColor="@color/charcoal"
         android:visibility="invisible"
         android:paddingLeft="10dp"
         android:paddingRight="10dp" />
 
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginBottom="20dp"
+        android:adjustViewBounds="true"
+        android:id="@+id/imageStatus"
+        android:src="@drawable/bluetooth"
+        android:layout_alignParentStart="true"
+        android:layout_above="@id/reconnect"
+        />
+
     <TextView
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="40dp"
         android:text="you're good to go"
         android:id="@+id/status"
+        android:background="@drawable/status"
         android:textSize="22sp"
-        android:paddingRight="40dp"
-        android:textColor="#FFFFFF"
-        android:layout_above="@id/reconnect"
+        android:textColor="@color/charcoal"
         android:maxLines="1"
         android:ellipsize="none"
-        android:layout_alignParentRight="true"
-        android:layout_marginBottom="20dp"
+        android:layout_alignTop="@id/imageStatus"
+        android:layout_alignParentEnd="true"
+        android:layout_toEndOf="@id/imageStatus"
         android:textIsSelectable="true"
-        android:gravity="center"/>
+        android:gravity="center"
+        android:layout_alignBottom="@+id/imageStatus" />
 </RelativeLayout>

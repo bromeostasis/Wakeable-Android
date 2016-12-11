@@ -161,6 +161,35 @@ public class SetupActivity extends AppCompatActivity {
 
 
     private void requestPermissions() {
+
+
+        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+
+        if (permission != PackageManager.PERMISSION_GRANTED) {
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
+            builder.setMessage("Wakeable stores app logs so the team can help you if you run into any issues. Please accept the following prompt to help us help you!")
+                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            int REQUEST_EXTERNAL_STORAGE = 1;
+                            String[] PERMISSIONS_STORAGE = {
+                                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            };
+                            // We don't have permission so prompt the user
+                            ActivityCompat.requestPermissions(
+                                    SetupActivity.this,
+                                    PERMISSIONS_STORAGE,
+                                    REQUEST_EXTERNAL_STORAGE
+                            );
+                        }
+                    });
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        }
+
         // Make sure we have location permissions
         if (ContextCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             AlertDialog.Builder builder = new AlertDialog.Builder(SetupActivity.this);
@@ -174,23 +203,5 @@ public class SetupActivity extends AppCompatActivity {
             dialog.show();
 
         }
-
-        int permission = ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE);
-
-        int REQUEST_EXTERNAL_STORAGE = 1;
-        String[] PERMISSIONS_STORAGE = {
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        };
-
-        if (permission != PackageManager.PERMISSION_GRANTED) {
-            // We don't have permission so prompt the user
-            ActivityCompat.requestPermissions(
-                    SetupActivity.this,
-                    PERMISSIONS_STORAGE,
-                    REQUEST_EXTERNAL_STORAGE
-            );
-        }
     }
-
 }
