@@ -173,9 +173,8 @@ public class MainActivity extends Activity {
                     ls.logString("Main", "Could not connect to bluetooth device. Not setting alarm");
 
                     AlertDialog.Builder builder = new AlertDialog.Builder(inst);
-                    builder.setMessage("We can't connect to your WakeAble device right now. Maybe your button is out of range or not plugged in? " +
-                            "If you proceed, the alarm may just go off like a regular alarm with no snooze button.")
-                        .setPositiveButton("I understand the risk, set my alarm anyway", new DialogInterface.OnClickListener() {
+                    builder.setMessage(R.string.set_without_connection)
+                        .setPositiveButton(R.string.set_anyway, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 Calendar selectedTime = getSelectedTime();
                                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
@@ -185,7 +184,7 @@ public class MainActivity extends Activity {
                                 ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                             }
                         })
-                        .setNegativeButton("Thanks, I'll get connected and try again", new DialogInterface.OnClickListener() {
+                        .setNegativeButton(R.string.reconnect_first, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int id) {
                                 // User cancelled the dialog
                                 ((ToggleButton) view).toggle();

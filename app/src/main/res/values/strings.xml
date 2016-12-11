@@ -8,4 +8,7 @@
     <string name="connected">you\'re good to go</string>
     <string name="alarm_instructions">Press the physical Wakeable button to turn off your alarm.</string>
     <string name="reconnect_fail">Looks like we\'re having some trouble connecting. Try moving closer to the device and re-starting the wakeable app. </string>
+    <string name="set_without_connection">Head's up: you're not connected to Wakeable, but you just turned on your alarm.</string>
+    <string name="reconnect_first">Got it, I will try to reconnect first.</string>
+    <string name="set_anyway">Set my alarm anyway, I'll connect to my device later.</string>
 </resources>
