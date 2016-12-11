@@ -39,7 +39,7 @@ public class RingtoneService extends Service {
 
         am =  (AudioManager) getSystemService(Context.AUDIO_SERVICE);
         previousVolume = am.getStreamVolume(AudioManager.STREAM_MUSIC);
-//        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
+        am.setStreamVolume(AudioManager.STREAM_MUSIC, am.getStreamMaxVolume(AudioManager.STREAM_MUSIC), 0);
         mPlayer = MediaPlayer.create(this, alarmUri);
         mPlayer.setLooping(true);
         mPlayer.start();
