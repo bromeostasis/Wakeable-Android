@@ -30,10 +30,11 @@ public class AlarmActivity extends AppCompatActivity {
 
     private static final String TAG = "AlarmActivity";
     private final String PREFS="preferences";
-    private Button btn;
+    private Button bftn;
     private TextView alarmText;
     private BluetoothAdapter mBluetoothAdapter;
-    private String[] quotes = {"Lorem Ipsum", "example two", "how's it doozit"};
+    private String[] quotes = getResources().getStringArray(R.array.wakeup_texts);
+
 
 
     // SPP UUID service
