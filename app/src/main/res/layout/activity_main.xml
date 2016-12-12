@@ -25,14 +25,14 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Your alarm is: "
+        android:text="@string/alarm_label"
         android:id="@+id/alarmToggleLabel"
         android:textSize="25sp"
         android:textColor="#FFFFFF"
         android:layout_alignTop="@id/alarmToggle"
         android:layout_alignBottom="@id/alarmToggle"
         android:layout_centerVertical="true"
-        android:layout_alignLeft="@id/alarmTimePicker"
+        android:layout_alignStart="@id/alarmTimePicker"
         android:textIsSelectable="true"
         android:gravity="center"/>
 
@@ -40,14 +40,13 @@
     <ToggleButton
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Alarm On/Off"
         android:background="@drawable/button"
         android:id="@+id/alarmToggle"
         android:textColor="@color/charcoal"
         android:onClick="onToggleClicked"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
-        android:layout_alignRight="@id/alarmTimePicker"/>
+        android:layout_alignEnd="@id/alarmTimePicker"/>
 
 
 
@@ -56,7 +55,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="reconnect"
+        android:text="@string/reconnect"
         android:background="@drawable/button"
         android:id="@+id/reconnect"
         android:onClick="reconnect"
@@ -81,7 +80,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="40dp"
-        android:text="you're good to go"
+        android:text="@string/connected"
         android:id="@+id/status"
         android:background="@drawable/status"
         android:textSize="22sp"

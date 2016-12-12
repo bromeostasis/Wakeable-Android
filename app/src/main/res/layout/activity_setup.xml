@@ -23,7 +23,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome to Wakeable"
+        android:text="@string/welcome"
         android:id="@+id/welcome"
         android:textSize="25sp"
         android:textColor="#FFFFFF"
@@ -52,7 +52,7 @@
     <TextView
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="plug in the Wakeable to a power source"
+        android:text="@string/setup_one"
         android:id="@+id/plugin"
         android:textSize="20sp"
         android:minLines="2"
@@ -73,7 +73,7 @@
     <TextView
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:text="plug in the Wakeable to a power source"
+        android:text="@string/setup_two"
         android:id="@+id/sync"
         android:textSize="20sp"
         android:minLines="2"
@@ -85,7 +85,7 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="no more snoozing!"
+        android:text="@string/setup_button"
         android:id="@+id/snooze"
         android:onClick="findWakeable"
         android:layout_alignParentBottom="true"
