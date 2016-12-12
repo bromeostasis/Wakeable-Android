@@ -12,19 +12,6 @@
     tools:context="com.wakeable.avengers.alarm_1_0.AlarmActivity"
     tools:showIn="@layout/activity_alarm">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Oh GOD turn it off"
-        android:id="@+id/button"
-        android:visibility="invisible"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:textColor="#5d5f5c"
-        android:background="@drawable/button"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:onClick="turnOffAlarm" />
 
     <TextView
         android:layout_width="300dp"
@@ -41,7 +28,6 @@
     <TextView
         android:layout_width="240dp"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
         android:id="@+id/alarmDirections"
         android:text="@string/alarm_instructions"
         android:textSize="18dp"
@@ -68,4 +54,19 @@
         android:layout_above="@+id/hr"
         android:src="@drawable/bedroom"
         android:layout_centerHorizontal="true" />
+
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Turn alarm off"
+        android:id="@+id/button"
+        android:visibility="invisible"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentEnd="true"
+        android:textColor="#5d5f5c"
+        android:background="@drawable/button"
+        android:paddingLeft="5dp"
+        android:paddingRight="5dp"
+        android:onClick="turnOffAlarm" />
 </RelativeLayout>

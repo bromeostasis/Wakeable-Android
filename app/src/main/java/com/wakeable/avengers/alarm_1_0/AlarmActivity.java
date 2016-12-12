@@ -32,8 +32,9 @@ public class AlarmActivity extends AppCompatActivity {
     private final String PREFS="preferences";
     private Button btn;
     private TextView alarmText;
+    private TextView alarmDirections;
     private BluetoothAdapter mBluetoothAdapter;
-    private String[] quotes = getResources().getStringArray(R.array.wakeup_texts);
+    private String[] quotes;
 
 
 
@@ -59,6 +60,7 @@ public class AlarmActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        quotes = getResources().getStringArray(R.array.wakeup_texts);
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
         super.onCreate(savedInstanceState);
@@ -66,7 +68,7 @@ public class AlarmActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         alarmText = (TextView) findViewById(R.id.alarmText);
-
+        alarmDirections = (TextView) findViewById(R.id.alarmDirections);
         btn = (Button) findViewById(R.id.button);
 
         // Initializes Bluetooth adapter.
@@ -88,17 +90,21 @@ public class AlarmActivity extends AppCompatActivity {
         super.onResume();
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
 
-        int randomIndex = ThreadLocalRandom.current().nextInt(0, quotes.length);
-        alarmText.setText(quotes[randomIndex]);
         SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
-        boolean connected = prefs.getBoolean("connected", true);
+        boolean connected = prefs.getBoolean("connected", false);
 
         ls.logString(TAG, "IN onresume. Visible? " + connected);
         if (connected){
             btn.setVisibility(View.INVISIBLE);
+            alarmDirections.setVisibility(View.VISIBLE);
+
+            int randomIndex = ThreadLocalRandom.current().nextInt(0, quotes.length);
+            alarmText.setText(quotes[randomIndex]);
         }
         else{
             btn.setVisibility(View.VISIBLE);
+            alarmDirections.setVisibility(View.INVISIBLE);
+            alarmText.setText(R.string.failsafe_message);
         }
     }
 
