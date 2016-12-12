@@ -53,7 +53,6 @@ public class MainActivity extends Activity {
     private SharedPreferences.Editor editor;
 
     private static final int SCAN_PERIOD = 5000;
-    private static final int STARTUP_SCAN_PERIOD= 3000;
 
 
     public static MainActivity instance() {
@@ -213,7 +212,7 @@ public class MainActivity extends Activity {
             boolean connected = prefs.getBoolean("connected", false);
             if (!connected) {
                 mBluetoothLeService.connect(address, mBluetoothAdapter);
-                checkConnectionAfterWait(true, SCAN_PERIOD);
+                checkConnectionAfterWait(true);
             }
             else{
                 ls.logString(TAG, "How did they click this? Just resetting the button");
@@ -238,7 +237,7 @@ public class MainActivity extends Activity {
         return calendar;
     }
 
-    private void checkConnectionAfterWait(final boolean showMessage, int amtOfTime){
+    private void checkConnectionAfterWait(final boolean showMessage){
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
@@ -260,7 +259,7 @@ public class MainActivity extends Activity {
                 }
 
             }
-        }, amtOfTime);
+        }, SCAN_PERIOD);
     }
 
     // Code to manage Service lifecycle.
@@ -277,7 +276,7 @@ public class MainActivity extends Activity {
                 if (!connected) {
                     ls.logString(TAG, "Back from killed state. Let's try to connect to the device");
                     mBluetoothLeService.connect(address, mBluetoothAdapter);
-                    checkConnectionAfterWait(false, STARTUP_SCAN_PERIOD);
+                    checkConnectionAfterWait(false);
                 }
             }
         }
