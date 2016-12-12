@@ -29,30 +29,25 @@ public class MainActivity extends Activity {
 //    private static PendingIntent pendingIntent;
     private static LogService ls = new LogService();
 
-    public static final int requestCode = 9999;
-    private static final String TAG = "MainActivity";
     private static AlarmManager alarmManager;
-    private final String PREFS = "preferences";
     private TimePicker alarmTimePicker;
     private static TextView status;
     private static MainActivity inst;
     private static ToggleButton alarmToggle;
     private static Button reconnectButton;
     private static ImageView imageStatus;
-    private boolean inForeground = false;
 
-    private Handler mHandler;
-
-    // From device activity
-    private final static int REQUEST_ENABLE_BT = 1;
     private BluetoothAdapter mBluetoothAdapter;
-    private boolean mScanning;
-    private String mBluetoothAddress;
     private BluetoothLeService mBluetoothLeService;
+    private boolean inForeground = false;
     private static SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
     private static final int SCAN_PERIOD = 7500;
+    private final static int REQUEST_ENABLE_BT = 1;
+    private final String PREFS = "preferences";
+    private static final String TAG = "MainActivity";
+    public static final int requestCode = 9999;
 
 
     public static MainActivity instance() {
