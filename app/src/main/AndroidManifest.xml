@@ -60,11 +60,6 @@
             android:name=".AlarmActivity"
             android:label="@string/title_activity_alarm"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity
-            android:name=".BluetoothActivity"
-            android:label="@string/title_activity_bluetooth"
-            android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".DeviceActivity" />
 
         <service
             android:name=".AlarmIntentService"
@@ -73,11 +68,6 @@
             android:name=".LogService"
             android:enabled="true"
             android:exported="true" />
-
-        <activity
-            android:name=".DeviceActivityLe"
-            android:label="@string/title_activity_device_activity_le"
-            android:theme="@style/AppTheme.NoActionBar" />
 
         <service
             android:name=".BluetoothLeService"
