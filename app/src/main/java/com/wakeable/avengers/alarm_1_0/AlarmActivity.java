@@ -1,9 +1,6 @@
 package com.wakeable.avengers.alarm_1_0;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,18 +8,12 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.View;
 import android.content.Context;
 import android.view.WindowManager;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import java.util.Random;
-import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class AlarmActivity extends AppCompatActivity {
@@ -33,17 +24,7 @@ public class AlarmActivity extends AppCompatActivity {
     private Button btn;
     private TextView alarmText;
     private TextView alarmDirections;
-    private BluetoothAdapter mBluetoothAdapter;
     private String[] quotes;
-
-
-
-    // SPP UUID service
-    private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-
-    // MAC-address of Bluetooth module (you must edit this line)
-
-    private static String address;
 
     @Override
     protected void onPause() {
@@ -70,19 +51,6 @@ public class AlarmActivity extends AppCompatActivity {
         alarmText = (TextView) findViewById(R.id.alarmText);
         alarmDirections = (TextView) findViewById(R.id.alarmDirections);
         btn = (Button) findViewById(R.id.button);
-
-        // Initializes Bluetooth adapter.
-//        final BluetoothManager bluetoothManager =
-//                (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-//        mBluetoothAdapter = bluetoothManager.getAdapter();
-//
-//        String address = prefs.getString("macAddress", "We Fucked UP");
-//        for (BluetoothDevice device : mBluetoothAdapter.getBondedDevices()){
-//            ls.logString(TAG, device.getName() + " found. address: " + device.getAddress());
-//            if (device.getAddress().equals(address)){
-//                btn.setVisibility(View.INVISIBLE);
-//            }
-//        }
     }
 
     @Override
@@ -124,6 +92,8 @@ public class AlarmActivity extends AppCompatActivity {
             finishAffinity();
         }
     }
+
+
     // ACTION_DATA_AVAILABLE: received data from the device.  This can be a result of read
     //                        or notification operations.
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
@@ -149,7 +119,5 @@ public class AlarmActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
-
-
 
 }
