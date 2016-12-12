@@ -52,7 +52,7 @@ public class MainActivity extends Activity {
     private static SharedPreferences prefs;
     private SharedPreferences.Editor editor;
 
-    private static final int SCAN_PERIOD = 5000;
+    private static final int SCAN_PERIOD = 7500;
 
 
     public static MainActivity instance() {
