@@ -26,7 +26,7 @@ import java.util.Calendar;
 public class MainActivity extends Activity {
 
 
-//    private static PendingIntent pendingIntent;
+    private static PendingIntent pendingIntent;
     private static LogService ls = new LogService();
 
     private static AlarmManager alarmManager;
@@ -156,8 +156,8 @@ public class MainActivity extends Activity {
                 ls.logString("MyActivity", "Alarm On");
                 Calendar selectedTime = getSelectedTime();
                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-//                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+//                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                 ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
             } else {
@@ -169,8 +169,8 @@ public class MainActivity extends Activity {
                         public void onClick(DialogInterface dialog, int id) {
                             Calendar selectedTime = getSelectedTime();
                             Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-//                            pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-                            PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+                            pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
+//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                             alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                             ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                         }
@@ -185,12 +185,12 @@ public class MainActivity extends Activity {
                 dialog.show();
             }
         } else {
-            Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-            PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
-            if(pendingIntent != null) {
-                alarmManager.cancel(pendingIntent);
-            }
-//            alarmManager.cancel(pendingIntent);
+//                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
+//                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
+//                if(pendingIntent != null) {
+//                    alarmManager.cancel(pendingIntent);
+//                }
+            alarmManager.cancel(pendingIntent);
             ls.logString("MyActivity", "Alarm Off");
         }
     }
