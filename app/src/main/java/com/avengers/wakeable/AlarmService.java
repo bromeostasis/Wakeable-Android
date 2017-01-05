@@ -1,4 +1,4 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 /**
  * Created by evansnyder on 2/29/16.
@@ -9,7 +9,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 public class AlarmService extends IntentService {
     private NotificationManager alarmNotificationManager;

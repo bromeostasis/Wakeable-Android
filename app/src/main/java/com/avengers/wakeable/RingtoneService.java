@@ -1,4 +1,4 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 import android.app.Service;
 import android.content.Intent;

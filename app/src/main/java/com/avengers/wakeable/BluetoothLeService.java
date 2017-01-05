@@ -1,4 +1,4 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 import android.app.Activity;
 import android.app.Service;
@@ -65,6 +65,13 @@ public class BluetoothLeService extends Service {
                 && mBluetoothGatt != null) {
             ls.logString(TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
+                SharedPreferences prefs = getApplicationContext().getSharedPreferences(PREFS, Activity.MODE_PRIVATE);
+                SharedPreferences.Editor editor = prefs.edit();
+                ls.logString(TAG, "Connection existed already, resetting just in case??!?");
+                editor.putBoolean("connected", true);
+                editor.commit();
+                MainActivity.toggleConnectionButton();
+
                 mConnectionState = STATE_CONNECTING;
                 return true;
             } else {
@@ -178,6 +185,7 @@ public class BluetoothLeService extends Service {
             ls.logString(TAG, "Connected to BLE device");
             editor.putBoolean("connected", true);
             editor.commit();
+            AlarmActivity.setFailsafe();
             MainActivity.toggleConnectionButton();
 
         }
@@ -185,6 +193,7 @@ public class BluetoothLeService extends Service {
             ls.logString(TAG, "Disconnected from BLE device");
             editor.putBoolean("connected", false);
             editor.commit();
+            AlarmActivity.setFailsafe();
             MainActivity.toggleConnectionButton();
         }
 

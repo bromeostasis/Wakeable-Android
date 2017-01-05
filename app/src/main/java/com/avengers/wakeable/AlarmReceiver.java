@@ -1,4 +1,4 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 /**
  * Created by evansnyder on 2/29/16.
@@ -6,8 +6,6 @@ package com.wakeable.avengers.alarm_1_0;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
-import android.util.Log;
-
 
 
 public class AlarmReceiver extends WakefulBroadcastReceiver {
@@ -19,7 +17,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
 
         Intent i = new Intent(context, AlarmIntentService.class);
         MainActivity mi = MainActivity.instance();
-        if (mi.isInForeground()){
+        if (mi != null && mi.isInForeground()){
             ls.logString("Receiver", "It's still in the foreground!");
             i.putExtra("foreground", true);
         }
@@ -33,7 +31,9 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         ls.logString("AlarmReceiver", "trying to send!");
 //        context.startActivity(i);
 
-        MainActivity.changeToggle();
+        if (mi != null) {
+            MainActivity.changeToggle();
+        }
         startWakefulService(context, i);
 
     }

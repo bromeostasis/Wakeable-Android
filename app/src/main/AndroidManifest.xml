@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.wakeable.avengers.alarm_1_0">
+    package="com.avengers.wakeable">
 
     <uses-sdk
         android:maxSdkVersion="23"
@@ -25,7 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
+            android:name="com.avengers.wakeable.MainActivity"
             android:label="@string/app_name">
 
             <!-- android:theme="@style/AppTheme.NoActionBar"> -->
@@ -46,35 +46,35 @@
         <!-- </intent-filter> -->
         <!-- </activity> -->
         <service
-            android:name=".AlarmService"
+            android:name="com.avengers.wakeable.AlarmService"
             android:enabled="true" />
 
-        <receiver android:name=".AlarmReceiver" />
+        <receiver android:name="com.avengers.wakeable.AlarmReceiver" />
 
         <service
-            android:name=".RingtoneService"
+            android:name="com.avengers.wakeable.RingtoneService"
             android:enabled="true"
             android:exported="true" />
 
         <activity
-            android:name=".AlarmActivity"
+            android:name="com.avengers.wakeable.AlarmActivity"
             android:label="@string/title_activity_alarm"
             android:theme="@style/AppTheme.NoActionBar" />
 
         <service
-            android:name=".AlarmIntentService"
+            android:name="com.avengers.wakeable.AlarmIntentService"
             android:exported="false" />
         <service
-            android:name=".LogService"
+            android:name="com.avengers.wakeable.LogService"
             android:enabled="true"
             android:exported="true" />
 
         <service
-            android:name=".BluetoothLeService"
+            android:name="com.avengers.wakeable.BluetoothLeService"
             android:enabled="true"
             android:exported="true" />
 
-        <activity android:name=".SetupActivity"
+        <activity android:name="com.avengers.wakeable.SetupActivity"
             android:theme="@style/AppTheme.NoActionBar">
         </activity>
     </application>

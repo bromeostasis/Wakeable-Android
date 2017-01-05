@@ -1,8 +1,7 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 import android.app.IntentService;
 import android.content.Intent;
-import android.content.Context;
 
 /**
  * An {@link IntentService} subclass for handling asynchronous task requests in
@@ -27,6 +26,7 @@ public class AlarmIntentService extends IntentService {
 
         Intent i = new Intent(this, AlarmActivity.class);
         i.putExtra("foreground", intent.getBooleanExtra("foreground", true));
+        i.putExtra("from", intent.getStringExtra("from"));
         i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(i);
 

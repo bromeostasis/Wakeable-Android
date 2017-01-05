@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
     android:background="#85d3e4"
-    tools:context="com.wakeable.avengers.alarm_1_0.AlarmActivity">
+    tools:context="com.avengers.wakeable.AlarmActivity">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

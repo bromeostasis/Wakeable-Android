@@ -1,4 +1,4 @@
-package com.wakeable.avengers.alarm_1_0;
+package com.avengers.wakeable;
 
 import android.app.Activity;
 import android.app.AlarmManager;
@@ -66,6 +66,10 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
 
         unbindService(mServiceConnection);
+        ls.logString(TAG, "Destroyed");
+        editor.putBoolean("connected", false);
+        editor.commit();
+
         super.onDestroy();
     }
 
@@ -123,28 +127,33 @@ public class MainActivity extends Activity {
     }
 
     public static void toggleConnectionButton(){
-        boolean connected = prefs.getBoolean("connected", false);
-        ls.logString(TAG, "connected value: " + connected);
-        if (connected){
+        // HELLA SHITTY WAY TO DO THIS. I actually want to know more in BLEService.broadcastUpdate TEMP AF
+        boolean connected;
+        if (prefs != null) {
+            connected = prefs.getBoolean("connected", false);
+            ls.logString(TAG, "connected value: " + connected);
 
-            inst.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    reconnectButton.setVisibility(View.INVISIBLE);
-                    status.setText(R.string.connected);
-                    imageStatus.setImageResource(R.drawable.bluetooth);
-                }
-            });
-        }
-        else{
-            inst.runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    reconnectButton.setVisibility(View.VISIBLE);
-                    status.setText(R.string.connection_required);
-                    imageStatus.setImageResource(R.drawable.exclamation);
-                }
-            });
+            if (connected){
+
+                inst.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        reconnectButton.setVisibility(View.INVISIBLE);
+                        status.setText(R.string.connected);
+                        imageStatus.setImageResource(R.drawable.bluetooth);
+                    }
+                });
+            }
+            else{
+                inst.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        reconnectButton.setVisibility(View.VISIBLE);
+                        status.setText(R.string.connection_required);
+                        imageStatus.setImageResource(R.drawable.exclamation);
+                    }
+                });
+            }
         }
     }
 
