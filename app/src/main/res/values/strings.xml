@@ -17,7 +17,7 @@
     <string name="failsafe_message">You are disconnected from your Wakeable.\n Press the button to stop your alarm.</string>
     <string name="failsafe_button">Turn alarm off</string>
     <string name="setup_button">no more snoozing!</string>
-    <string name="setup_two">plug in the Wakeable to a power source</string>
+    <string name="setup_two">sync this app with your Wakeable; click below</string>
     <string name="setup_one">plug in the Wakeable to a power source</string>
     <string name="welcome">Welcome to Wakeable</string>
     <string name="alarm_label">Your alarm is:</string>
