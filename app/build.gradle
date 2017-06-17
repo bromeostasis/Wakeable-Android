@@ -6,10 +6,10 @@ android {
 
     defaultConfig {
         applicationId "com.avengers.wakeable"
-        minSdkVersion 18
+        minSdkVersion 19
         targetSdkVersion 23
-        versionCode 12
-        versionName "1.2"
+        versionCode 13
+        versionName "1.3"
     }
     buildTypes {
         release {
