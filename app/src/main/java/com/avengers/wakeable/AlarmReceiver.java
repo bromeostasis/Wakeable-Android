@@ -27,9 +27,7 @@ public class AlarmReceiver extends WakefulBroadcastReceiver {
         }
         i.putExtra("from", "Receiver");
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        //this will send a notification message
         ls.logString("AlarmReceiver", "trying to send!");
-//        context.startActivity(i);
 
         if (mi != null) {
             MainActivity.changeToggle();

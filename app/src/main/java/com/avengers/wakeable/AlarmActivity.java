@@ -65,7 +65,6 @@ public class AlarmActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         Intent where = getIntent();
         String source = where.getStringExtra("from");
-        ls.logString(TAG, "Where'd this activity come fram??? " + source);
         where.removeExtra("from");
 
         inst = this;
@@ -89,7 +88,6 @@ public class AlarmActivity extends AppCompatActivity {
         }
 
 
-        ls.logString(TAG, "IN onCreate, about to create the service");
         // Bind service
         Intent bleServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(bleServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
@@ -108,11 +106,9 @@ public class AlarmActivity extends AppCompatActivity {
     }
 
     public static void setFailsafe() {
-        // HELLA SHITTY WAY TO DO THIS. I actually want to know more in BLEService.broadcastUpdate TEMP AF
-
+ 
         if (prefs != null) {
             boolean connected = prefs.getBoolean("connected", false);
-            Log.d(TAG, "Setting failsafe stuff, what's the status? " + connected);
             if (connected) {
                 inst.runOnUiThread(new Runnable() {
                     @Override
@@ -138,9 +134,6 @@ public class AlarmActivity extends AppCompatActivity {
     }
 
     public void turnOffAlarm(View view){
-
-        ls.logString(TAG, "turning it off now?!?!");
-
         Context context = view.getContext();
         Intent ringtoneIntent = new Intent(context, RingtoneService.class);
         context.stopService(ringtoneIntent);
@@ -187,14 +180,9 @@ public class AlarmActivity extends AppCompatActivity {
 
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
-            ls.logString(TAG, "Nice, the service is connected");
             mBluetoothLeService = ((BluetoothLeService.LocalBinder) service).getService();
-
-
             String address = prefs.getString("macAddress", "empty");
-            ls.logString(TAG, "That address: " + address);
             if (!address.equals("empty")) {
-                ls.logString(TAG, "One time, let's try to connect!");
                 mBluetoothLeService.connect(address, mBluetoothAdapter);
             }
         }

@@ -130,16 +130,10 @@ public class BluetoothLeService extends Service {
                                 if (characteristic.getUuid().equals(UUID_HM10_CHARACTERISTIC)){
                                     ls.logString(TAG, "Found the HM10 characteristic! Want to try reading and notifying!");
                                     setCharacteristicNotification(characteristic, true);
-//                                    onCharacteristicRead(mBluetoothGatt, characteristic, status);
                                 }
                             }
                         }
                     }
-//                    if (status == BluetoothGatt.GATT_SUCCESS) {
-//                        broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
-//                    } else {
-//                        Log.w(TAG, "onServicesDiscovered received: " + status);
-//                    }
                 }
 
                 @Override
@@ -246,9 +240,6 @@ public class BluetoothLeService extends Service {
         // After using a given device, you should make sure that BluetoothGatt.close() is called
         // such that resources are cleaned up properly.  In this particular example, close() is
         // invoked when the UI is disconnected from the Service.
-//        if (mBluetoothGatt != null){
-//            mBluetoothGatt.close();
-//        }
         return super.onUnbind(intent);
     }
 

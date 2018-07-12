@@ -127,7 +127,6 @@ public class MainActivity extends Activity {
     }
 
     public static void toggleConnectionButton(){
-        // HELLA SHITTY WAY TO DO THIS. I actually want to know more in BLEService.broadcastUpdate TEMP AF
         boolean connected;
         if (prefs != null) {
             connected = prefs.getBoolean("connected", false);
@@ -166,7 +165,6 @@ public class MainActivity extends Activity {
                 Calendar selectedTime = getSelectedTime();
                 Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
                 pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-//                    PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                 ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
             } else {
@@ -179,7 +177,6 @@ public class MainActivity extends Activity {
                             Calendar selectedTime = getSelectedTime();
                             Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
                             pendingIntent = PendingIntent.getBroadcast(getBaseContext(), 0, myIntent, 0);
-//                                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
                             alarmManager.setExact(AlarmManager.RTC_WAKEUP, selectedTime.getTimeInMillis(), pendingIntent);
                             ls.logString("MyActivity", String.valueOf(selectedTime.getTime()));
                         }
@@ -194,11 +191,6 @@ public class MainActivity extends Activity {
                 dialog.show();
             }
         } else {
-//                Intent myIntent = new Intent(getBaseContext(), AlarmReceiver.class);
-//                PendingIntent pendingIntent = PendingIntent.getBroadcast(getBaseContext(), requestCode, myIntent, PendingIntent.FLAG_NO_CREATE);
-//                if(pendingIntent != null) {
-//                    alarmManager.cancel(pendingIntent);
-//                }
             alarmManager.cancel(pendingIntent);
             ls.logString("MyActivity", "Alarm Off");
         }
@@ -234,9 +226,7 @@ public class MainActivity extends Activity {
         calendar.set(Calendar.MINUTE, alarmTimePicker.getCurrentMinute());
         calendar.set(Calendar.SECOND, 0);
         if (calendar.compareTo(today) < 0) {
-            ls.logString("MainActivity", "Let's set this for tomorrow?");
             calendar.set(Calendar.DAY_OF_WEEK, calendar.get(Calendar.DAY_OF_WEEK) + 1);
-            ls.logString("MainActivity", "Cool, now we've got: " + String.valueOf(calendar.getTime()));
         }
         return calendar;
     }

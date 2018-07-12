@@ -22,12 +22,6 @@ public class AlarmService extends IntentService {
     public void onHandleIntent(Intent intent) {
 
         sendNotification("Wake Up! Wake Up!");
-//        Intent i = new Intent(this, MainActivity.class);
-//
-//        i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK|Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//        ls.logString("AlarmService", "trying to redirect!");
-//        startActivity(i);
-//        AlarmReceiver.completeWakefulIntent(intent);
     }
 
     private void sendNotification(String msg) {
@@ -40,7 +34,6 @@ public class AlarmService extends IntentService {
 
         NotificationCompat.Builder alamNotificationBuilder = new NotificationCompat.Builder(
                 this).setContentTitle("Alarm")
-//                 .setSmallIcon(R.drawable.ic_launcher)
                 .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                 .setContentText(msg);
 
